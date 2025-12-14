@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+
+body {
+  background-color: #FFF2D3;
+  margin-left: 100px;
+  margin-right: 100px;
+  color: rgba(0, 0, 0, 0.8);
+  font-family: "Red Hat Display";
+}
