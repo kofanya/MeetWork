@@ -10,7 +10,7 @@ class User (db.Model):
     first_name = db.Column(db.String(50))
     second_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
-    old = db.Column(db.Integer)
+    age = db.Column(db.Integer)
     contact_phone = db.Column(db.String(20))
     email = db.Column(db.String(120), unique = True)
     password_hash = db.Column(db.String(255))
@@ -18,12 +18,11 @@ class User (db.Model):
     date = db.Column(db.DateTime, default = datetime.utcnow)
     employer = db.relationship('Employer', backref = 'user', uselist = False)
     applicant = db.relationship('Applicant', backref = 'user', uselist = False)
-    event = db.relationship('Event', backref='user')
-    vacancy = db.relationship('Vacancy', backref = 'user')
+    event = db.relationship('Event', backref='organizer')
     comment_vacancy = db.relationship('Comment_vacancy',backref = 'user')
     comment_event = db.relationship('Comment_event',backref = 'user')
-    recipient = db.relationship('Notification',foreign_keys = [('Notification.recipient_user_id')],backref = 'recipient')
-    sender = db.relationship('Notification',foreign_keys = [('Notification.sender_user_id')],backref = 'sender')
+    recipient = db.relationship('Notification',foreign_keys = [('Notification.recipient_user_id')],backref = 'recipient_user')
+    sender = db.relationship('Notification',foreign_keys = [('Notification.sender_user_id')],backref = 'sender_user')
     sign_appointment = db.relationship('Sign_appointment',backref = 'user')
     sign_vacancy = db.relationship('Sign_vacancy', backref = 'user')
     
@@ -90,7 +89,7 @@ class Notification(db.Model):
 
 class Sign_appointment(db.Model):
     id = db.Column(db.Integer,primary_key = True)
-    organaizer_id = db.Column(db.Integer,db.ForeignKey('user.id'))
+    organizer_id = db.Column(db.Integer,db.ForeignKey('user.id'))
     event_id = db.Column(db.Integer,db.ForeignKey('event.id'))
     date = db.Column(db.DateTime, default = datetime.utcnow)
 
