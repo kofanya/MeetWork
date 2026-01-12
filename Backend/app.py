@@ -188,6 +188,18 @@ class Logout(Resource):
             return jsonify({'message': 'Произошла ошибка выхода из профиля на стороне БД', 'error': str(e)}),500
 api.add_resource(Logout,'/api/logout')
 
+class Profile(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = int(get_jwt_identity())
+        user_role = get_jwt()['role']
+        current_user = User.query.filter_by(id = user_id).first()
+        data_user = {'first_name': current_user.first_name, 'second_name': current_user.second_name, 'last_name': current_user.last_name,
+                     'age': current_user.age, 'contact_phone': current_user.contact_phone, 'email': current_user.email,
+                          }
+
+
+
 
 
 
