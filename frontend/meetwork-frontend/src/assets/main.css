@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 body {
-  background-color: #FFF2D3;
+  /* background-color: #FFF2D3; */
+  background-color: rgba(255, 242, 211, 0.8);
   color: rgba(0, 0, 0, 0.8);
   font-family: "Manrope", sans-serif;
     font-weight: 500;
@@ -52,10 +53,29 @@ html, body {
   border-color: #E17801;
   box-shadow: 0 0 0 3px rgba(151, 51, 238, 0.2);
 }
+    .textarea-scrollable {
+    min-height: 120px;
+    resize: vertical;
+  }
+
 
 .button{
   padding: 8px 30px;
   background: #BFC5A9;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 32px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.20);
+}
+
+.z-button{
+  padding: 8px 30px;
+  background: #FBEBC3;
   text-align: center;
   text-decoration: none;
   border: none;

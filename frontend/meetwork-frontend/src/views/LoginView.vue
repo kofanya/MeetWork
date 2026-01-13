@@ -18,7 +18,8 @@
 <style scoped>
 
 .title{
-  margin-top: 20px;
+  margin-top: 50px;
+  font-size: 52px;
 }
 
 .button{

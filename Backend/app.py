@@ -15,12 +15,11 @@ from flask_jwt_extended import  (
     get_jwt
 )
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
+app.config['JWT_SECRET_KEY'] = '834g93gb9ug34u9njscd234kmpiq3jipwuo3v55vu94fpi53foqfm3ipw7vu959uw'
 api = Api(app)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
-app.config['JWT_SECRET_KEY'] = '834g93gb9ug34u9njscd234kmpiq3jipwuo3v55vu94fpi53foqfm3ipw7vu959uw'
-
 class User (db.Model):
     id = db.Column(db.Integer,primary_key = True)
     first_name = db.Column(db.String(50))
@@ -139,6 +138,7 @@ class Register(Resource):
                             last_name = data_user['last_name'],
                             age = data_user['age'],
                             contact_phone = data_user['contact_phone'],
+                            role=data_user['role'],
                             email = data_user['email'],
                             password = psw_hash,)
             try:

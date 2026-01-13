@@ -13,8 +13,15 @@
           <li><RouterLink to="/events">Мероприятия</RouterLink></li>
           <li><RouterLink to="/about">О проекте</RouterLink></li>
           <li><RouterLink to="/personal">Личный кабинет</RouterLink></li>
+
+          <li><RouterLink to="/createvacancies">Создание вакансии</RouterLink></li>
+          
+          <li><RouterLink to="/createevents">Создание мероприятия</RouterLink></li>
+
           <li><RouterLink to="/register">Регистрация</RouterLink></li>
           <li><RouterLink to="/login" class="login-button">Вход</RouterLink></li>
+
+
         </ul>
       </nav>
     </div>
@@ -36,7 +43,7 @@
 }
 
 .header {
-  background-color: #FBEBC3;
+  background-color: rgba(251, 235, 195, 0.8); 
   height: 70px;
 }
 
@@ -53,7 +60,7 @@
 .header-nav ul {
   list-style: none;
   display: flex;
-  gap: 70px;
+  gap: 25px;
 }
 
 .header-nav a {

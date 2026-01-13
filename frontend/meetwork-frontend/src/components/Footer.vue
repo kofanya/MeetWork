@@ -20,7 +20,7 @@
 
 <style>
   .footer {
-  background-color: #FBEBC3;
+  background-color: rgba(251, 235, 195, 0.8);
   height: 70px;
   margin-top: 100px;
 }
