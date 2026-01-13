@@ -22,7 +22,7 @@
   .footer {
   background-color: #FBEBC3;
   height: 70px;
-  margin-top: auto;
+  margin-top: 100px;
 }
 
 .footer-container {

@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div class="container">
+    <div class="home-page">
       <div class="text-column">
         <h1 class="welcome-title">Один клик и работа в кармане!</h1>
         <RouterLink to="/vacancies" class="button" >
@@ -21,10 +21,13 @@
   width: 755px;
 }
 
-.container{
+.home-page{
   display: grid;
   grid-template-columns: 1fr 1fr;
   height: 100vh;
+  max-width: 1250px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .welcome-title{
   padding-top: 230px;
