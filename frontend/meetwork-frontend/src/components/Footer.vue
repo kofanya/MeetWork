@@ -13,15 +13,40 @@
             <img src="#" alt="GitHub">
           </a>
         </li>
-        <li>
-          <a href="#" aria-label="Telegram">
-            <img src="#" alt="Telegram">
-          </a>
-        </li>
       </ul>
     </div>
   </footer>
 </template>
+
+<style>
+  .footer {
+  background-color: #FBEBC3;
+  height: 70px;
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1250px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+}
+.footer-brand a{
+  text-decoration: none;
+}
+
+.footer-social {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+</style>
 
 <script setup>
 import { RouterLink } from 'vue-router'

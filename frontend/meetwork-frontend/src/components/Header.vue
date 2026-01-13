@@ -14,13 +14,76 @@
           <li><RouterLink to="/about">О проекте</RouterLink></li>
           <li><RouterLink to="/personal">Личный кабинет</RouterLink></li>
           <li><RouterLink to="/register">Регистрация</RouterLink></li>
-          <li><RouterLink to="/login">Вход</RouterLink></li>
+          <li><RouterLink to="/login" class="login-button">Вход</RouterLink></li>
         </ul>
       </nav>
     </div>
 
   </header>
 </template>
+
+<style>
+
+.logo-text{
+  color: #E17801;
+  font-size: 32px;
+  margin: 0;
+  
+}
+
+.header-logo a{
+  text-decoration: none;
+}
+
+.header {
+  background-color: #FBEBC3;
+  height: 70px;
+}
+
+.header-container {
+  max-width: 1250px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+
+.header-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 70px;
+}
+
+.header-nav a {
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.8);
+  transition: color 0.2s;
+}
+
+.header-nav a:hover,
+.header-nav a:focus {
+  color: #E17801;
+}
+
+.login-button{
+    padding: 6px 36px;
+    background: #BFC5A9;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.20);
+}
+
+.header-nav .login-button:hover,
+.header-nav .login-button:focus {
+  background: #AEB494;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+</style>
 
 <script setup>
 import { RouterLink } from 'vue-router'
