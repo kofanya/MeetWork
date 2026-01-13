@@ -3,26 +3,29 @@
     <h1 clacc="title">Регистрация</h1>
     <form @submit="register">
       <label>Имя</label>
-      <input type="text" v-model="registerForm.first_name" class="form-control" required><br>
+      <input type="text" v-model="registerForm.first_name" class="form-control" required><br/>
       <label>Фамилия</label>
-      <input type="text" v-model="registerForm.second_name" class="form-control" required><br>
+      <input type="text" v-model="registerForm.second_name" class="form-control" required><br/>
       <label>Отчество</label>
-      <input type="text" v-model="registerForm.last_name"class="form-control" required><br>
+      <input type="text" v-model="registerForm.last_name"class="form-control" required><br/>
       <label>Возраст</label>
-      <input type="number" v-model="registerForm.age" class="form-control" required><br>
+      <input type="number" v-model="registerForm.age" class="form-control" required><br/>
       <label>Номер телефона</label>
-      <input type="tel" v-model="registerForm.contact_phone"class="form-control" required><br>
+      <input type="tel" v-model="registerForm.contact_phone"class="form-control" required><br/>
       <label>Роль</label>
       <select v-model="registerForm.role" class="form-control" required>
         <option v-for="(name, key) in ROLES" :value="key">{{ name }}</option>
-      </select><br>
+      </select><br/>
       <label>Почта</label>
-      <input type="email"  v-model="registerForm.email"class="form-control" required><br>
+      <input type="email"  v-model="registerForm.email"class="form-control" required><br/>
       <label>Пароль</label>
-      <input type="password" v-model="registerForm.password" class="form-control" required><br>
-      <RouterLink to="/login" >
+      <input type="password" v-model="registerForm.password" class="form-control" required><br/>
+      <div class="back">
+        <RouterLink to="/login">
           Уже зарегистрированы? Войдите, чтобы продолжить
-        </RouterLink><br><br>
+        </RouterLink>
+      </div><br/><br/>
+      
       <button class="button" type="submit">Зарегистрироваться</button>
   </form>
   </div>

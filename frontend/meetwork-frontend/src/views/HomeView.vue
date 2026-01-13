@@ -1,6 +1,7 @@
 <template>
-  <main>
-    <div class="home-page">
+  <body>
+    <main>
+    <div class="page">
       <div class="text-column">
         <h1 class="welcome-title">Один клик и работа в кармане!</h1>
         <RouterLink to="/vacancies" class="button" >
@@ -12,6 +13,9 @@
       </div>
     </div>
   </main>
+
+  </body>
+  
 </template>
 
 <style scoped>
@@ -21,7 +25,10 @@
   width: 755px;
 }
 
-.home-page{
+.body{
+  background-color: rgba(255, 242, 211, 0.8);
+}
+.page{
   display: grid;
   grid-template-columns: 1fr 1fr;
   height: 100vh;

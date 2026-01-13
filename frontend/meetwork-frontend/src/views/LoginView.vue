@@ -6,10 +6,12 @@
       <input type="email" class="form-control" required><br>
       <label>Пароль</label>
       <input type="password"class="form-control" required><br>
-      <RouterLink to="/register" >
+      <div class="back">
+        <RouterLink to="/register" >
           Нет аккаунта? Зарегистрируйтесь, чтобы 
           продолжить
-        </RouterLink><br><br>
+        </RouterLink>
+      </div><br><br>
       <button class="button" type="submit">Войти</button>
     </form>
   </div>

@@ -12,7 +12,7 @@
           <li><RouterLink to="/vacancies">Поиск работы</RouterLink></li>
           <li><RouterLink to="/events">Мероприятия</RouterLink></li>
           <li><RouterLink to="/about">О проекте</RouterLink></li>
-          <li><RouterLink to="/personal">Личный кабинет</RouterLink></li>
+          <li><RouterLink to="/profile">Личный кабинет</RouterLink></li>
 
           <li><RouterLink to="/createvacancies">Создание вакансии</RouterLink></li>
           
