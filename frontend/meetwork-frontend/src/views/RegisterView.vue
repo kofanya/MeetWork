@@ -28,22 +28,17 @@
   </div>
 </template>
 
-<style>
-.container{
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-width: 1250px;
-  margin-left: auto;
-  margin-right: auto;
-}
+<style scoped>
 .title{
   text-align: center; 
   margin: 0;
 }
-
+.button{
+  margin-left: 23px;
+}
 </style>
+
+
 
 <script>
 import { ROLES } from '@/utils/roles'

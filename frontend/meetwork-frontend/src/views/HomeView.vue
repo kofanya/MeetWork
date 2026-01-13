@@ -14,7 +14,7 @@
   </main>
 </template>
 
-<style>
+<style scoped>
 .welcome-img{
   margin-top: -20px;
   height:890px;
