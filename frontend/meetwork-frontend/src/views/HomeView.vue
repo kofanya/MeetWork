@@ -4,7 +4,7 @@
     <div class="page">
       <div class="text-column">
         <h1 class="welcome-title">Один клик и работа в кармане!</h1>
-        <RouterLink to="/vacancies" class="button" >
+        <RouterLink to="/vacancies" class="vacancy-button" >
           Смотреть вакансии
         </RouterLink>
       </div>
@@ -41,19 +41,24 @@
   font-size: 52px;
   font-weight: bold;
 }
-
-.button{
-  padding: 10px 30px;
+.vacancy-button {
+  padding: 12px 28px;
   background: #BFC5A9;
-  text-align: center;
-  text-decoration: none;
+  color: #2d3748;
+  font-size: 18px;
+  font-weight: 600;
   border: none;
-  color: rgba(0, 0, 0, 0.8);
-  font-size: 32px;
+  border-radius: 12px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.25s ease;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.20);
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* более плавная кривая */
+}
+
+.vacancy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #e5ebce;
 }
 .text-column .button:hover,
 .text-column .button:focus {

@@ -19,8 +19,14 @@
 </template>
 
 <style>
+.logo-text{
+  color: #E17801;
+  font-size: 32px;
+  margin: 0;
+  
+}
   .footer {
-  background-color: rgba(251, 235, 195, 0.8);
+  background-color: rgba(251, 235, 195, 0.6);
   height: 70px;
 }
 

@@ -25,7 +25,7 @@
 }
 
 .button{
-  margin-left: 100px;
+  margin-left: 125px;
   margin-top: 10px;
   padding: 8px 60px;
 }

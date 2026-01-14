@@ -71,7 +71,7 @@ import { EVENTCATEGORIES } from '@/utils/eventcategories'
 }
 
 .blog-card {
-  background-color: #f9f4f4;
+  background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

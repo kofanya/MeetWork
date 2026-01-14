@@ -25,9 +25,9 @@
 
     <div >
       <div style="margin-top: 20px;">
-        <RouterLink to="/editevents" class="button" style="margin-right: 40px;">
+        <!-- <RouterLink to="/editevents" class="button" style="margin-right: 40px;">
           Редактировать
-        </RouterLink>
+        </RouterLink> -->
         <button type="button" class="button" style="background: #fc8b8b;">
           Удалить
         </button>

@@ -80,7 +80,7 @@ import { CATEGORIES } from '@/utils/categories'
 }
 
 .blog-card {
-  background-color: #f9f4f4;
+  background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);

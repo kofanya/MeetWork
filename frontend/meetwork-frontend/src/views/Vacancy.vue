@@ -25,10 +25,10 @@
 
     <div >
       <div style="margin-top: 20px;">
-        <RouterLink to="/editevents" class="button" style="margin-right: 40px;">
+        <!-- <RouterLink to="/editevents" class="button" style="margin-right: 40px;">
           Редактировать
-        </RouterLink>
-        <button type="button" class="button" style="background: #fc8b8b;">
+        </RouterLink> -->
+        <button type="button" class="delete-button">
           Удалить
         </button>
       </div>
@@ -87,5 +87,24 @@
     margin-bottom: 100px;
     margin-top: 50px;
 }
+
+.delete-button {
+  padding: 12px 28px;
+  background: #f1a18b;
+  color: #2d3748;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.delete-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #f3bba8;}
 
 </style>
