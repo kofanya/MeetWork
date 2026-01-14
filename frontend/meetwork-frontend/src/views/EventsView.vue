@@ -1,11 +1,14 @@
 
 <template>
-  <div class="container">
+  <div class="content-wrapper">
     <h1 class="title">Актуальные мероприятия</h1>
-    <label>Категория</label>
-      <select class="form-control"required>
-        <option v-for="(name, key) in EVENTCATEGORIES" :value="key">{{ name }}</option>
-      </select><br>
+
+    <div class="filter-wrapper">
+      <label>Фильтрация по категориям:</label>
+      <select class="form-control" required>
+        <option v-for="(name, key) in EVENTCATEGORIES" :value="key" :key="key">{{ name }}</option>
+      </select>
+    </div>
     <div class="blog-cards">
       <div class="blog-card">
         <div class="card-header">
@@ -35,10 +38,7 @@
           <div class="description">Краткое описание мероприятия.</div>
           <div class="btn-wrapper">
             <RouterLink to="/event" class="read-more">
-              Читать далее
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="arrow-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-              </svg>
+              Читать далее...
             </RouterLink>
           </div>
         </div>
@@ -52,6 +52,18 @@ import { EVENTCATEGORIES } from '@/utils/eventcategories'
 </script>
 
 <style scoped>
+
+.content-wrapper {
+  width: 840px;
+  margin: 0 auto;
+}
+
+.filter-wrapper {
+  max-width: 840px;
+  margin: 0 auto 24px;
+  gap: 8px;
+}
+
 .blog-cards {
   display: grid;
   grid-template-columns: 1fr;
@@ -63,9 +75,15 @@ import { EVENTCATEGORIES } from '@/utils/eventcategories'
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
   height: auto;
   width: 840px;
   min-height: 220px;
+}
+
+.blog-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px); 
 }
 
 .card-header {

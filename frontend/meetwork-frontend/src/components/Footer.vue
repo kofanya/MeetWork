@@ -5,7 +5,7 @@
         <RouterLink to="/">
           <h3 class="logo-text">MeetWork</h3>
         </RouterLink>
-        <span>© 2025 Company, Inc</span>
+        <span>© 2026 Company, Inc</span>
       </div>
       <ul class="footer-social">
         <li>

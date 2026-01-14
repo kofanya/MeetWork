@@ -2,11 +2,13 @@
 <template>
   <div class="container-2">
     <h1 class="title">Актуальные вакансии</h1>
-    <label>Категория</label>
+    <label>Фильтрация по категориям: </label><br/>
       <select class="form-control"required>
         <option v-for="(name, key) in CATEGORIES" :value="key">{{ name }}</option>
       </select><br>
+
     <div class="blog-cards">
+
       <div class="blog-card">
         <div class="card-header">
           <div class="category-wrapper">
@@ -28,16 +30,17 @@
         <div class="card-content">
           <div class="description">Зарплата От</div>
           <div class="btn-wrapper">
-            <RouterLink to="/event" class="read-more">
-              Читать далее
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="arrow-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-              </svg>
+            <RouterLink to="/vacancy" class="read-more">
+              Читать далее...
             </RouterLink>
           </div>
         </div>
       </div>
+
+      
+
     </div>
+
   </div>
 </template>
 
@@ -45,22 +48,52 @@
 import { CATEGORIES } from '@/utils/categories'
 </script>
 
-
 <style scoped>
+.container-2 {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.title {
+  text-align: center;
+  margin: 40px 0 20px;
+  color: #333;
+}
+
+.form-control {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 24px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+}
 
 .blog-cards {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
+  justify-items: center;
 }
 
 .blog-card {
   background-color: #f9f4f4;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  height: 300;
-  width: 400px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 380px;
+  min-height: 260px;
+  cursor: pointer;
+}
+
+.blog-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px); 
 }
 
 .card-header {
@@ -83,9 +116,8 @@ import { CATEGORIES } from '@/utils/categories'
   display: inline-block;
 }
 
-
 .card-title {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
   margin: 8px 0 12px;
   color: #222;
@@ -122,7 +154,7 @@ import { CATEGORIES } from '@/utils/categories'
   margin-bottom: 16px;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -135,48 +167,30 @@ import { CATEGORIES } from '@/utils/categories'
 .read-more {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
   border: none;
   border-radius: 50px;
   font-weight: 600;
   font-size: 0.9rem;
-  color: #E17801; 
+  color: #E17801;
   background: transparent;
   text-decoration: none;
-  box-shadow: none; 
+  box-shadow: none;
   transition: color 0.2s;
 }
 
 .read-more:hover {
   color: #c96801;
-  background: transparent; 
+  background: transparent;
 }
 
 .arrow-icon {
   width: 16px;
   height: 16px;
 }
-
-.bookmark-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.bookmark-btn:hover {
-  background: #e0e0e0;
-}
-
-.bookmark-btn svg {
-  width: 18px;
-  height: 18px;
-  color: #666;
-}
 </style>
+
+
+
 

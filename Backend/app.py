@@ -36,8 +36,8 @@ class User (db.Model):
     event = db.relationship('Event', backref='organizer')
     comment_vacancy = db.relationship('Comment_vacancy',backref = 'user')
     comment_event = db.relationship('Comment_event',backref = 'user')
-    recipient = db.relationship('Notification',foreign_keys = [('Notification.recipient_user_id')],backref = 'recipient_user')
-    sender = db.relationship('Notification',foreign_keys = [('Notification.sender_user_id')],backref = 'sender_user')
+    recipient = db.relationship('Notification',foreign_keys = 'Notification.recipient_user_id',backref = 'recipient_user')
+    sender = db.relationship('Notification',foreign_keys = 'Notification.sender_user_id',backref = 'sender_user')
     sign_appointment = db.relationship('Sign_appointment',backref = 'user')
     sign_vacancy = db.relationship('Sign_vacancy', backref = 'user')
     
@@ -130,7 +130,7 @@ class Register(Resource):
     def post(self):
         data_user = request.get_json()
         if not data_user:
-            return jsonify({'message': 'Данные пользователя для регистрации JSON не были получены сервером'}),400
+            return {'message': 'Данные пользователя для регистрации JSON не были получены сервером'},400
         else:
             psw_hash = generate_password_hash(data_user['password'])
             new_user = User(first_name = data_user['first_name'],
@@ -144,17 +144,18 @@ class Register(Resource):
             try:
                 db.session.add(new_user)
                 db.session.commit()
-                return jsonify({'message':'Вы успешно зарегистрировались в БД'}),201
+                return {'message':'Вы успешно зарегистрировались в БД'},201
             except Exception as e:
                 db.session.rollback()
-                return jsonify({'message': 'При регистрации произошла ошибка на стороне БД','error': str(e)}),500
+                return {'message': 'При регистрации произошла ошибка на стороне БД','error': str(e)},500
+            
 api.add_resource(Register,'/api/register')
 
 class Login(Resource):
     def post(self):
         data_login = request.get_json()
         if not data_login:
-            return jsonify({'message': 'Данные пользователя для аунтификации JSON не были получены сервером'}),400
+            return {'message': 'Данные пользователя для аунтификации JSON не были получены сервером'},400
         else:
             email = data_login['email']
             psw = data_login['password']
@@ -169,7 +170,7 @@ class Login(Resource):
                 set_refresh_cookies(response,refresh_token)
                 return response
             else:
-                return jsonify({'message': 'Пользователья не существует или неверный пароль'}),404
+                return {'message': 'Пользователья не существует или неверный пароль'},404
 api.add_resource(Login,'/api/login')
 
 class Logout(Resource):
