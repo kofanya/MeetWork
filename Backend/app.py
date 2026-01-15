@@ -3,7 +3,7 @@ from flask import Flask, request, redirect, url_for, jsonify,make_response
 from datetime import datetime
 from flask_restful import Api, Resource, reqparse ,marshal_with,marshal,fields
 from werkzeug.security import check_password_hash,generate_password_hash
-from flask_jwt_extended import  (
+from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     jwt_required,
@@ -37,8 +37,8 @@ class User (db.Model):
     event = db.relationship('Event', backref='organizer')
     comment_vacancy = db.relationship('Comment_vacancy',backref = 'user')
     comment_event = db.relationship('Comment_event',backref = 'user')
-    recipient = db.relationship('Notification',foreign_keys = [('Notification.recipient_user_id')],backref = 'recipient_user')
-    sender = db.relationship('Notification',foreign_keys = [('Notification.sender_user_id')],backref = 'sender_user')
+    recipient = db.relationship('Notification',foreign_keys = 'Notification.recipient_user_id',backref = 'recipient_user')
+    sender = db.relationship('Notification',foreign_keys = 'Notification.sender_user_id',backref = 'sender_user')
     sign_appointment = db.relationship('Sign_appointment',backref = 'user')
     sign_vacancy = db.relationship('Sign_vacancy', backref = 'user')
     
@@ -116,7 +116,7 @@ class Sign_vacancy(db.Model):
     date = db.Column(db.DateTime, default = datetime.utcnow)
 
 @jwt.token_in_blocklist_loader
-def check(jwt_payload):
+def check(jwt_header,jwt_payload):
     jti = jwt_payload['jti']
     token = Token_Black_list.query.filter_by(jti = jti).first()
     return token is not None
@@ -131,30 +131,34 @@ class Register(Resource):
     def post(self):
         data_user = request.get_json()
         if not data_user:
-            return jsonify({'message': 'Данные пользователя для регистрации JSON не были получены сервером'}),400
+            return {'message': 'Данные пользователя для регистрации JSON не были получены сервером'},400
         else:
-            psw_hash = generate_password_hash(data_user['password'])
-            new_user = User(first_name = data_user['first_name'],
-                            second_name = data_user['second_name'],
-                            last_name = data_user['last_name'],
-                            age = data_user['age'],
-                            contact_phone = data_user['contact_phone'],
-                            email = data_user['email'],
-                            password = psw_hash,)
-            try:
-                db.session.add(new_user)
-                db.session.commit()
-                return jsonify({'message':'Вы успешно зарегистрировались в БД'}),201
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({'message': 'При регистрации произошла ошибка на стороне БД','error': str(e)}),500
+            if User.query.filter_by(email = data_user['email']).first():
+                return {'message':'Вы уже зарегистрированы на сайте'},400
+            else:
+
+                psw_hash = generate_password_hash(data_user['password'])
+                new_user = User(first_name = data_user['first_name'],
+                                second_name = data_user['second_name'],
+                                last_name = data_user['last_name'],
+                                age = data_user['age'],
+                                contact_phone = data_user['contact_phone'],
+                                email = data_user['email'],
+                                password = psw_hash,)
+                try:
+                    db.session.add(new_user)
+                    db.session.commit()
+                    return {'message':'Вы успешно зарегистрировались в БД'},201
+                except Exception as e:
+                    db.session.rollback()
+                    return {'message': 'При регистрации произошла ошибка на стороне БД','error': str(e)},500
 api.add_resource(Register,'/api/register')
 
 class Login(Resource):
     def post(self):
         data_login = request.get_json()
         if not data_login:
-            return jsonify({'message': 'Данные пользователя для аунтификации JSON не были получены сервером'}),400
+            return {'message': 'Данные пользователя для аунтификации JSON не были получены сервером'},400
         else:
             email = data_login['email']
             psw = data_login['password']
@@ -169,7 +173,7 @@ class Login(Resource):
                 set_refresh_cookies(response,refresh_token)
                 return response
             else:
-                return jsonify({'message': 'Пользователья не существует или неверный пароль'}),404
+                return {'message': 'Пользователья не существует или неверный пароль'},404
 api.add_resource(Login,'/api/login')
 
 class Logout(Resource):
@@ -185,36 +189,103 @@ class Logout(Resource):
             return response
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Произошла ошибка выхода из профиля на стороне БД', 'error': str(e)}),500
+            return {'message': 'Произошла ошибка выхода из профиля на стороне БД', 'error': str(e)},500
 api.add_resource(Logout,'/api/logout')
 
 class Profile(Resource):
     @jwt_required()
     def get(self):
         user_id = int(get_jwt_identity())
-        user_role = get_jwt()['role']
-        current_user = User.query.filter_by(id = user_id).first()
-        data_user = {'first_name': current_user.first_name, 'second_name': current_user.second_name, 'last_name': current_user.last_name,
-                     'age': current_user.age, 'contact_phone': current_user.contact_phone, 'email': current_user.email,
-                          }
+        current_user = User.query.get(user_id)
+        if not current_user:
+             return {'message': 'Пользователь не найден'}, 404
+        data_user = {
+            'first_name': current_user.first_name,
+            'second_name': current_user.second_name,
+            'last_name': current_user.last_name,
+            'age': current_user.age,
+            'contact_phone': current_user.contact_phone,
+            'email': current_user.email,
+            'role': current_user.role
+        }
 
-
-
-
-
-
-
-
-
-
+        if current_user.role == 'employer':
+            employer_info = None
+            if current_user.employer:
+                employer_info = {
+                    'company_name': current_user.employer.company_name,
+                    'contact_website': current_user.employer.contact_website
+                }
+            return {'information': employer_info, 'data_user': data_user}, 200
         
+        elif current_user.role == 'applicant':
+            applicant_info = None
+            if current_user.applicant:
+                applicant_info = {
+                    'resume': current_user.applicant.resume,
+                    'education': current_user.applicant.education
+                }
+            return {'information': applicant_info, 'data_user': data_user}, 200
         
+        else:
+            return {'data_user': data_user}, 200
+    @jwt_required()
+    def post(self):
+        data_user = request.get_json()
+        if not data_user:
+            return {'message': 'Данные пользователя для добавления JSON не были получены сервером'},400
+        else:
+            user_id = int(get_jwt_identity())
+            current_user = User.query.filter_by(id = user_id).first()
+            if current_user.role == 'employer':
+                employer_information = Employer(user_id = user_id, company_name = data_user.get('company_name'),
+                                                contact_website = data_user.get('contact_website'))
+                try:
+                    db.session.add(employer_information)
+                    db.session.commit()
+                    return {'message': 'Данные работодятеля обновлены'}, 201
+                except Exception as e:
+                    db.session.rollback()
+                    return {'message': 'Ошибка при добавлении данных работодателя', 'error': str(e)}, 500
+            elif current_user.role == 'applicant':
+                applicant_information = Applicant(user_id = user_id, resume = data_user.get('resume'), education = data_user.get('education'))
+                try:
+                    db.session.add(applicant_information)
+                    db.session.commit()
+                    return {'message': 'Данные соискателя обновлены'}, 201
+                except Exception as e:
+                    db.session.rollback()
+                    return {'message': 'Ошибка при добавлении данных соискателя', 'error': str(e)}, 500
+    @jwt_required()
+    def put(self):
+        data_user = request.get_json()
+        if not data_user:
+            return {'message': 'Данные для изменения не получены'}, 400
 
+        user_id = int(get_jwt_identity())
+        current_user = User.query.get(user_id)
+        user_fields = ['first_name', 'second_name', 'last_name', 'age', 'contact_phone']
+        employer_fields = ['company_name', 'contact_website']
+        applicant_fields = ['resume', 'education']
 
-
-
-
-
+        for key, value in data_user.items():
+            if key in user_fields:
+                setattr(current_user, key, value)
+            
+            elif current_user.role == 'employer' and key in employer_fields:
+                if current_user.employer:
+                    setattr(current_user.employer, key, value)
+            
+            elif current_user.role == 'applicant' and key in applicant_fields:
+                if current_user.applicant:
+                    setattr(current_user.applicant, key, value)
+        try:
+            db.session.commit()
+            return {'message': 'Данные пользователя успешно обновлены'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message':'Ошибка при обновление данных пользователя в БД','error': str(e)}, 500
+api.add_resource(Profile, '/api/profile')
 
 
 
