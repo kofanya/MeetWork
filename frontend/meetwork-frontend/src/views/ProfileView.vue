@@ -18,11 +18,14 @@
       <button class="z-button" type="submit">Отменить</button>
   </form>
 
-  <div class="back">
+  <div class="back" v-if="auth.user?.role === 'employer'">
       <RouterLink to="/vacancies">Смотреть отклики на вакансии</RouterLink>
   </div>
-  <div class="back">
+  <div class="back" v-if="auth.user?.role === 'organizer'">
       <RouterLink to="/vacancies">Смотреть записи на мероприятия</RouterLink>
+  </div>
+  <div class="back"  v-if="auth.user?.role === 'applicant'">
+      <RouterLink to="/vacancies">Смотреть мои отклики на вакансии и записи на мероприятия</RouterLink>
   </div>
   </div>
 </template>
@@ -43,6 +46,8 @@ form {
 }
 
 </style>
-<script>
+<script setup>
+import { useAuthStore } from '@/stores/auth'
 
+const auth = useAuthStore()
 </script>

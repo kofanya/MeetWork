@@ -52,7 +52,7 @@
   cursor: pointer;
   text-decoration: none;
   text-align: center;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* более плавная кривая */
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .vacancy-button:hover {

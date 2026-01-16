@@ -1,8 +1,15 @@
 <script setup>
-import { RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
+
+onMounted(() => {
+  const auth = useAuthStore()
+  auth.checkAuth()
+})
 </script>
+
 
 <template>
   <div class="page">
@@ -26,5 +33,3 @@ import Footer from '@/components/Footer.vue'
 }
 
 </style>
-
-

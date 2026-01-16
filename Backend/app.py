@@ -17,9 +17,32 @@ from flask_jwt_extended import (
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
 app.config['JWT_SECRET_KEY'] = '834g93gb9ug34u9njscd234kmpiq3jipwuo3v55vu94fpi53foqfm3ipw7vu959uw'
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # ← только куки!
+# app.py
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # ← отключить CSRF
 api = Api(app)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
+
+@jwt.unauthorized_loader
+def unauthorized_callback(error_string):
+    print("❌ [JWT] Unauthorized:", error_string)
+    return jsonify({"message": "Токен отсутствует или недействителен"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error_string):
+    print("❌ [JWT] Invalid token:", error_string)
+    return jsonify({"message": "Недействительный токен"}), 401
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    print("❌ [JWT] Token expired:", jwt_payload)
+    return jsonify({"message": "Срок действия токена истёк"}), 401
+
+@jwt.revoked_token_loader
+def revoked_token_callback(jwt_header, jwt_payload):
+    print("❌ [JWT] Token revoked:", jwt_payload)
+    return jsonify({"message": "Токен отозван"}), 401
 
 class User (db.Model):
     id = db.Column(db.Integer,primary_key = True)
@@ -68,6 +91,7 @@ class Vacancy(db.Model):
     is_active = db.Column(db.Boolean, default = True)
     comment_vacancy = db.relationship('Comment_vacancy',backref = 'vacancy')
     sign_vacancy = db.relationship('Sign_vacancy',backref = 'vacancy')
+    category = db.Column(db.String(50))
 
 class Event(db.Model):
     id = db.Column(db.Integer,primary_key = True)
@@ -302,12 +326,19 @@ class VacancyResource(Resource):
                 'title': v.title,
                 'salary_min': v.salary_min,
                 'salary_max': v.salary_max,
-                'company_name': v.employer.company_name if v.employer else "Unknown"
+                'company_name': v.employer.company_name if v.employer else "Unknown",
+                'category': v.category
             })
         return {'vacancies': result}, 200
 
     @jwt_required()
     def post(self):
+        try:
+            user_id = int(get_jwt_identity())
+            print("User ID from token:", user_id)  # ← будет в терминале Flask
+        except Exception as e:
+            print("JWT error:", e)
+            return {'message': 'Invalid token'}, 401
         data = request.get_json()
         user_id = int(get_jwt_identity())
         current_user = User.query.get(user_id)
@@ -321,7 +352,8 @@ class VacancyResource(Resource):
             description = data.get('description'),
             salary_min = data.get('salary_min'),
             salary_max = data.get('salary_max'),
-            is_active = True
+            is_active = True,
+            category = data.get('category')
         )
         try:
             db.session.add(new_vacancy)

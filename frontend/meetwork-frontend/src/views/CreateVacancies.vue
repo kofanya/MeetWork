@@ -1,26 +1,26 @@
 <template>
   <div class="container">
     <h1 class="title">Создание вакансии</h1>
-    <form>
+    <form @submit.prevent="handleSubmit">
       <label>Вакансия</label>
-      <input type="text" class="form-control" required><br>
+      <input v-model="form.title" type="text" class="form-control" required><br>
       <label>Описание</label>
-      <textarea class="form-control textarea-scrollable" rows="10" required></textarea><br>
+      <textarea v-model="form.description" class="form-control textarea-scrollable" rows="10" required></textarea><br>
       <label>Требования</label>
-      <textarea class="form-control textarea-scrollable" rows="10" required></textarea><br>
+      <textarea v-model="form.requirements" class="form-control textarea-scrollable" rows="10" required></textarea><br>
       <label>Адрес предприятия</label>
-      <input type="text" class="form-control" required><br>
+      <input v-model="form.location" type="text" class="form-control" required><br>
       <label>Зарплата</label><br>
       <label>От:</label><br>
-      <input type="number"class="form-control" required><br>
+      <input v-model="form.salary_min" type="number"class="form-control" required><br>
       <label>До:</label>
-      <input type="number"class="form-control" required><br>
+      <input v-model="form.salary_max" type="number"class="form-control" required><br>
       <label>Категория</label>
-      <select class="form-control" required>
+      <select  v-model="form.category" class="form-control" required>
         <option v-for="(name, key) in CATEGORIES" :value="key">{{ name }}</option>
       </select><br>
       <button class="button" type="submit">Создать</button>
-      <button class="z-button" type="submit">Отменить</button>
+      <button class="z-button" type="submit"  @click="$router.back()">Отменить</button>
   </form>
   </div>
 </template>
@@ -42,6 +42,67 @@ form {
 
 </style>
 
-<script>
+<script setup>
 import { CATEGORIES } from '@/utils/categories'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const router = useRouter()
+const form = ref({
+  title: '',
+  description: '',
+  requirements: '',
+  location: '',
+  salary_min: null,
+  salary_max: null,
+  category: ''
+})
+
+const handleSubmit = async () => {
+  // Валидация (опционально)
+  if (form.value.salary_min > form.value.salary_max) {
+    alert('Минимальная зарплата не может быть больше максимальной')
+    return
+  }
+
+  try {
+    const response = await fetch('/api/vacancy', {
+      method: 'POST',
+      credentials: 'include', // важно для JWT cookies
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: form.value.title,
+        description: form.value.description,
+        requirements: form.value.requirements,
+        location: form.value.location,
+        salary_min: form.value.salary_min,
+        salary_max: form.value.salary_max,
+        // Поле category пока не используется в бэкенде,
+        // но можно добавить позже или передавать как intro
+        category: form.value.category // ← если хотите использовать intro как категорию
+      })
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert('Вакансия создана!')
+      router.push('/vacancies')
+    } else if (response.status === 401) {
+      // Сессия истекла или токен недействителен
+      authStore.logoutLocal() // ✅ правильно
+      alert('Сессия завершена. Пожалуйста, войдите снова.')
+      router.push('/login')
+    } else {
+      const data = await response.json()
+      alert(data.message || 'Ошибка создания')
+    }} 
+    catch (error) {
+    console.error('Ошибка сети:', error)
+    alert('Не удалось подключиться к серверу')
+  }
+}
 </script>

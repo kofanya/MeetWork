@@ -14,13 +14,27 @@
           <li><RouterLink to="/about">О проекте</RouterLink></li>
           <li><RouterLink to="/profile">Личный кабинет</RouterLink></li>
 
-          <li><RouterLink to="/createvacancies">Создание вакансии</RouterLink></li>
-            
-          <li><RouterLink to="/createevents">Создание мероприятия</RouterLink></li>
+          <li v-if="auth.isAuthenticated && auth.user?.role === 'employer'">
+            <RouterLink to="/createvacancies">Создание вакансии</RouterLink>
+          </li>
 
-          <li><RouterLink to="/register">Регистрация</RouterLink></li>
-          <li><RouterLink to="/login" class="login-button">Вход</RouterLink></li>
+          <li v-if="auth.isAuthenticated && auth.user?.role === 'organizer'">
+            <RouterLink to="/createevents">Создание мероприятия</RouterLink>
+          </li>
+
+          <li v-if="auth.isAuthenticated">
+            Привет, {{ auth.user?.first_name }}!
+          </li>
+          <li v-if="auth.isAuthenticated">
+            <button @click="logout" class="login-button">Выход</button>
+          </li>
+
+          <template v-else>
+            <li><RouterLink to="/register">Регистрация</RouterLink></li>
+            <li><RouterLink to="/login" class="login-button">Вход</RouterLink></li>
+          </template>
         </ul>
+    
       </nav>
     </div>
 
@@ -93,14 +107,15 @@
   background: #e5ebce;
 }
 
-/* .header-nav .login-button:hover,
-.header-nav .login-button:focus {
-  background: #AEB494;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-} */
 </style>
 
 <script setup>
 import { RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+
+const logout = async () => {
+  await auth.logout()
+}
 </script>
