@@ -168,7 +168,6 @@ import { CATEGORIES } from '@/utils/categories'
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
   border: none;
   border-radius: 50px;
   font-weight: 600;
