@@ -3,49 +3,65 @@
   <div class="container-2">
     <h1 class="title">Актуальные вакансии</h1>
     <label>Фильтрация по категориям: </label><br/>
-      <select class="form-control"required>
+      <select v-model="selectedCategory"  class="form-control"required>
         <option v-for="(name, key) in CATEGORIES" :value="key">{{ name }}</option>
       </select><br>
 
     <div class="blog-cards">
-
-      <div class="blog-card">
+      <div v-for="vacancy in filteredVacancies" :key="vacancy.id" class="blog-card">
         <div class="card-header">
           <div class="category-wrapper">
             <span class="category-dot"></span>
-            <span>Категория</span>
+            <span>{{ CATEGORIES[vacancy.category] || vacancy.category || 'Без категории' }}</span>
           </div>
-          <h2 class="card-title">Название вакансии</h2>
+          <h2 class="card-title">{{ vacancy.title }}</h2>
           <div class="meta">
             <span class="date">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
               </svg>
-              Адрес предприятия: Москва
+              {{ vacancy.location || 'Адрес не указан' }}
             </span>
-             <span>Работодатель</span>
+            <span>{{ vacancy.company_name || 'Работодатель не указан' }}</span>
           </div>
         </div>
 
         <div class="card-content">
-          <div class="description">Зарплата От</div>
+          <div class="description">Зарплата от {{ vacancy.salary_min || '—' }} до {{ vacancy.salary_max || '—' }}</div>
           <div class="btn-wrapper">
-            <RouterLink to="/vacancy" class="read-more">
+            <RouterLink :to="`/vacancy/${vacancy.id}`" class="read-more">
               Читать далее...
             </RouterLink>
           </div>
         </div>
       </div>
-
-      
-
     </div>
-
+       
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, computed } from 'vue'
 import { CATEGORIES } from '@/utils/categories'
+
+const vacancies = ref([])
+const selectedCategory = ref('')
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/vacancy')
+    const data = await res.json()
+    vacancies.value = data.vacancies || []
+  } catch (err) {
+    console.error('Ошибка загрузки вакансий:', err)
+  }
+})
+
+const filteredVacancies = computed(() => {
+  if (!selectedCategory.value) return vacancies.value
+  return vacancies.value.filter(v => v.category === selectedCategory.value)
+})
+
 </script>
 
 <style scoped>

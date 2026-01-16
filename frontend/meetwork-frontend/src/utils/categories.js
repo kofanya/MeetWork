@@ -6,5 +6,5 @@ export const CATEGORIES = {
   finance: 'Финансы',
   restaurantbusiness: 'Ресторанный бизнес',
   sales: 'Продажи',
-  other: '',
+  other: 'другое',
 }

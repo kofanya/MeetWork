@@ -31,15 +31,11 @@ const router = createRouter({
 
     { path: '/createvacancies', component: CreateVacancies },
     { path: '/editvacancies', component: EditVacancies },
-    { path: '/vacancy', component: Vacancy },
-    { path: '/event', component: Event},
     { path: '/createevents', component: CreateEvents },
     { path: '/editevents', component: EditEvents },
 
-    { path: '/vacancy', component: Vacancy},
-    { path: '/event', component: Event },
-
-
+    { path: '/vacancy/:id', component: Vacancy },
+    { path: '/event/:id', component: Event },
 
   ],
 })

@@ -18,7 +18,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
 app.config['JWT_SECRET_KEY'] = '834g93gb9ug34u9njscd234kmpiq3jipwuo3v55vu94fpi53foqfm3ipw7vu959uw'
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # ← только куки!
-# app.py
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # ← отключить CSRF
 api = Api(app)
 jwt = JWTManager(app)
@@ -317,19 +316,42 @@ class Profile(Resource):
 api.add_resource(Profile, '/api/profile')
 
 class VacancyResource(Resource):
-    def get(self):
-        active_vacancies = Vacancy.query.filter_by(is_active = True).all()
-        result = []
-        for v in active_vacancies:
-            result.append({
+    def get(self, vacancy_id=None):
+        if vacancy_id is None:
+            # Список всех вакансий
+            active_vacancies = Vacancy.query.filter_by(is_active=True).all()
+            result = []
+            for v in active_vacancies:
+                result.append({
+                    'id': v.id,
+                    'title': v.title,
+                    'salary_min': v.salary_min,
+                    'salary_max': v.salary_max,
+                    'company_name': v.employer.company_name if v.employer else "Unknown",
+                    'category': v.category,
+                    'location': v.location,
+                    'date': v.date.isoformat() if v.date else None
+                })
+            return {'vacancies': result}, 200
+        else:
+            # Одна вакансия по ID
+            v = Vacancy.query.get(vacancy_id)
+            if not v or not v.is_active:
+                return {'message': 'Вакансия не найдена'}, 404
+
+            return {
                 'id': v.id,
                 'title': v.title,
+                'intro': v.intro,
+                'description': v.description,
+                'requirements': v.requirements,
                 'salary_min': v.salary_min,
                 'salary_max': v.salary_max,
+                'location': v.location,
                 'company_name': v.employer.company_name if v.employer else "Unknown",
-                'category': v.category
-            })
-        return {'vacancies': result}, 200
+                'category': v.category,
+                'date': v.date.isoformat() if v.date else None
+            }, 200
 
     @jwt_required()
     def post(self):
@@ -384,7 +406,7 @@ class VacancyResource(Resource):
             db.session.rollback()
             return {'message': 'Ошибка удаления', 'error': str(e)}, 500
 
-api.add_resource(VacancyResource, '/api/vacancy')
+api.add_resource(VacancyResource, '/api/vacancy', '/api/vacancy/<int:vacancy_id>')
 
 class EventResource(Resource):
     def get(self):
@@ -632,6 +654,42 @@ class CommentResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'message': 'Ошибка удаления', 'error': str(e)}, 500
+        
+    def get(self):
+        vacancy_id = request.args.get('vacancy_id', type=int)
+        event_id = request.args.get('event_id', type=int)
+
+        if not vacancy_id and not event_id:
+            return {'message': 'Укажите vacancy_id или event_id'}, 400
+
+        comments = []
+        if vacancy_id:
+            comments = Comment_vacancy.query.filter_by(vacancy_id=vacancy_id).all()
+            result = []
+            for c in comments:
+                user = User.query.get(c.user_id) if c.user_id else None
+                result.append({
+                    'id': c.id,
+                    'text': c.text,
+                    'date': c.date.isoformat() if c.date else None,
+                    'user_id': c.user_id,
+                    'author_name': f"{user.first_name} {user.last_name}" if user else "Аноним"
+                })
+            return {'comments': result}, 200
+
+        elif event_id:
+            comments = Comment_event.query.filter_by(event_id=event_id).all()
+            result = []
+            for c in comments:
+                user = User.query.get(c.user_id) if c.user_id else None
+                result.append({
+                    'id': c.id,
+                    'text': c.text,
+                    'date': c.date.isoformat() if c.date else None,
+                    'user_id': c.user_id,
+                    'author_name': f"{user.first_name} {user.last_name}" if user else "Аноним"
+                })
+            return {'comments': result}, 200
 
 api.add_resource(CommentResource, '/api/comment')
 
