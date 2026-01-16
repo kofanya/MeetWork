@@ -1,9 +1,107 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 body {
-  background-color: #FFF2D3;
-  margin-left: 100px;
-  margin-right: 100px;
+  /* background-color: #FFF2D3; */
+  /* background-color: rgba(255, 250, 238, 0.8); */
+  background-color: rgba(255, 242, 211, 0.2);
   color: rgba(0, 0, 0, 0.8);
-  font-family: "Red Hat Display";
+  font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.container{
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1250px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 100px;
+  margin-top: 50px;
+}
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+.form-control:focus {
+  outline: none;
+  border-color: #E17801;
+  box-shadow: 0 0 0 3px rgba(151, 51, 238, 0.2);
+}
+    .textarea-scrollable {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+
+.button {
+  padding: 12px 28px;
+  background: #BFC5A9;
+  color: #2d3748;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* более плавная кривая */
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #e5ebce;
+}
+.z-button{
+  background: #f8edd0;
+  padding: 12px 28px;
+  color: #2d3748;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+}
+.z-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #fbf5e3;
+}
+
+.back {
+  color: #495057;
+  transition: color 0.2s;
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+}
+.back a:hover,
+.back a:focus{
+    color: #E17801;
 }
