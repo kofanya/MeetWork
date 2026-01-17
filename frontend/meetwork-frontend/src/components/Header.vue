@@ -72,7 +72,7 @@
 .header-nav ul {
   list-style: none;
   display: flex;
-  gap: 25px;
+  gap: 32px;
 }
 
 .header-nav a {
@@ -110,12 +110,14 @@
 </style>
 
 <script setup>
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const logout = async () => {
   await auth.logout()
+  router.push('/')
 }
 </script>

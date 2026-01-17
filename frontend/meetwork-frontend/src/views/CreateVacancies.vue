@@ -60,7 +60,6 @@ const form = ref({
 })
 
 const handleSubmit = async () => {
-  // Валидация (опционально)
   if (form.value.salary_min > form.value.salary_max) {
     alert('Минимальная зарплата не может быть больше максимальной')
     return
@@ -69,7 +68,7 @@ const handleSubmit = async () => {
   try {
     const response = await fetch('/api/vacancy', {
       method: 'POST',
-      credentials: 'include', // важно для JWT cookies
+      credentials: 'include', 
       headers: {
         'Content-Type': 'application/json'
       },
@@ -80,9 +79,7 @@ const handleSubmit = async () => {
         location: form.value.location,
         salary_min: form.value.salary_min,
         salary_max: form.value.salary_max,
-        // Поле category пока не используется в бэкенде,
-        // но можно добавить позже или передавать как intro
-        category: form.value.category // ← если хотите использовать intro как категорию
+        category: form.value.category
       })
     })
 
@@ -93,7 +90,7 @@ const handleSubmit = async () => {
       router.push('/vacancies')
     } else if (response.status === 401) {
       // Сессия истекла или токен недействителен
-      authStore.logoutLocal() // ✅ правильно
+      authStore.logoutLocal() 
       alert('Сессия завершена. Пожалуйста, войдите снова.')
       router.push('/login')
     } else {

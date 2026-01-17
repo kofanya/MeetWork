@@ -27,7 +27,7 @@
         </div>
 
         <div class="card-content">
-          <div class="description">Зарплата от {{ vacancy.salary_min || '—' }} до {{ vacancy.salary_max || '—' }}</div>
+          <div class="description">Зарплата от {{ vacancy.salary_min  }} до {{ vacancy.salary_max }}</div>
           <div class="btn-wrapper">
             <RouterLink :to="`/vacancy/${vacancy.id}`" class="read-more">
               Читать далее...

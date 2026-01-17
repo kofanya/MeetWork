@@ -1,51 +1,99 @@
-
 <template>
   <div class="content-wrapper">
     <h1 class="title">Актуальные мероприятия</h1>
 
     <div class="filter-wrapper">
       <label>Фильтрация по категориям:</label>
-      <select class="form-control"  required>
+      <select v-model="selectedCategory" class="form-control"  required>
         <option v-for="(name, key) in EVENTCATEGORIES" :value="key" :key="key">{{ name }}</option>
       </select>
     </div>
-    <div class="blog-cards">
-      <div class="blog-card">
-        <div class="card-header">
-          <div class="category-wrapper">
-            <span class="category-dot"></span>
-            <span>Категория</span>
-          </div>
-          <h2 class="card-title">Название мероприятия</h2>
-          <div class="meta">
-            <span class="date">
-              Место проведения: Москва
-            </span>
-            <span class="date">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-              Дата проведения: 15 января 2026
-            </span>
-             <span>Организатор </span>
-          </div>
-        </div>
 
-        <div class="card-content">
-          <div class="description">Краткое описание мероприятия.</div>
-          <div class="btn-wrapper">
-            <RouterLink to="/event" class="read-more">
-              Читать далее...
-            </RouterLink>
+      <!-- Список мероприятий -->
+      <div v-if="loading" class="loading">Загрузка...</div>
+      <div v-else-if="filteredEvents.length === 0" class="no-events">
+        Мероприятия не найдены.
+      </div>
+      <div v-else class="blog-cards">
+        <div v-for="event in filteredEvents" :key="event.id" class="blog-card">
+          <div class="card-header">
+            <div class="category-wrapper">
+              <span class="category-dot"></span>
+              <span>{{ EVENTCATEGORIES[event.category] || event.category || 'Без категории' }}</span>
+            </div>
+            <h2 class="card-title">{{ event.title }}</h2>
+            <div class="meta">
+              <span class="location">
+                Место проведения: {{ event.location || 'Не указано' }}
+              </span>
+              <span class="date">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                Дата проведения: {{ formatDate(event.date) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <div class="description">{{ event.description || 'Описание отсутствует' }}</div>
+            <div class="btn-wrapper">
+              <RouterLink :to="`/event/${event.id}`" class="read-more">
+                Читать далее...
+              </RouterLink>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
-<script>
+       
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { EVENTCATEGORIES } from '@/utils/eventcategories'
+
+const events = ref([])
+const loading = ref(true)
+const selectedCategory = ref('')
+
+const loadEvents = async () => {
+  try {
+    const res = await fetch('/api/event')
+    if (res.ok) {
+      const data = await res.json()
+      events.value = data.events || []
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки мероприятий:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const filteredEvents = computed(() => {
+  if (!selectedCategory.value) {
+    return events.value
+  }
+  return events.value.filter(event => event.category === selectedCategory.value)
+})
+// Форматирование даты
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+onMounted(() => {
+  loadEvents()
+})
 </script>
 
 <style scoped>

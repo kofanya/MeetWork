@@ -16,9 +16,17 @@
       <p>{{ vacancy.requirements }}</p>
     </div>
 
-    <div v-if="authStore.isAuthenticated && authStore.user?.role === 'applicant' || !authStore.isAuthenticated">
+    <div v-if="authStore.isAuthenticated && authStore.user?.role === 'applicant'">
       <div style="margin-top: 20px;">
-        <RouterLink to="/" class="button" style="background: #c4fab6;">
+        <button @click="applyToVacancy" class="button" style="background: #c4fab6;">
+          Откликнуться
+        </button>
+      </div>
+    </div>
+
+    <div v-else-if="!authStore.isAuthenticated">
+      <div style="margin-top: 20px;">
+        <RouterLink to="/login" class="button" style="background: #c4fab6;">
           Откликнуться
         </RouterLink>
       </div>
@@ -197,6 +205,38 @@ const submitComment = async () => {
     } else {
       const data = await response.json()
       alert(data.message || 'Ошибка добавления комментария')
+    }
+  } catch (error) {
+    console.error('Ошибка сети:', error)
+    alert('Не удалось подключиться к серверу')
+  }
+}
+
+const applyToVacancy = async () => {
+  if (!authStore.isAuthenticated || authStore.user?.role !== 'applicant') {
+    alert('Только соискатели могут откликаться на вакансии')
+    return
+  }
+
+  try {
+    const response = await fetch('/api/vacancy/apply', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vacancy_id: route.params.id })
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      alert(data.message)
+    } else if (response.status === 409) {
+      alert('Вы уже откликнулись на эту вакансию')
+    } else if (response.status === 401) {
+      authStore.logoutLocal()
+      router.push('/login')
+    } else {
+      const err = await response.json()
+      alert(err.message || 'Ошибка при отклике')
     }
   } catch (error) {
     console.error('Ошибка сети:', error)

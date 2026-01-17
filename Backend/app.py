@@ -25,22 +25,22 @@ db = SQLAlchemy(app)
 
 @jwt.unauthorized_loader
 def unauthorized_callback(error_string):
-    print("❌ [JWT] Unauthorized:", error_string)
+    print(" [JWT] Unauthorized:", error_string)
     return jsonify({"message": "Токен отсутствует или недействителен"}), 401
 
 @jwt.invalid_token_loader
 def invalid_token_callback(error_string):
-    print("❌ [JWT] Invalid token:", error_string)
+    print(" [JWT] Invalid token:", error_string)
     return jsonify({"message": "Недействительный токен"}), 401
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
-    print("❌ [JWT] Token expired:", jwt_payload)
+    print(" [JWT] Token expired:", jwt_payload)
     return jsonify({"message": "Срок действия токена истёк"}), 401
 
 @jwt.revoked_token_loader
 def revoked_token_callback(jwt_header, jwt_payload):
-    print("❌ [JWT] Token revoked:", jwt_payload)
+    print(" [JWT] Token revoked:", jwt_payload)
     return jsonify({"message": "Токен отозван"}), 401
 
 class User (db.Model):
@@ -102,6 +102,7 @@ class Event(db.Model):
     location = db.Column(db.String(100))
     capacity = db.Column(db.Integer)
     date = db.Column(db.DateTime, default = datetime.utcnow)
+    category = db.Column(db.String(50))
     is_active = db.Column(db.Boolean, default = True)
     comment_event = db.relationship('Comment_event',backref = 'event')
     sign_appointment = db.relationship('Sign_appointment',backref = 'event')
@@ -271,7 +272,7 @@ class Profile(Resource):
                 try:
                     db.session.add(employer_information)
                     db.session.commit()
-                    return {'message': 'Данные работодятеля обновлены'}, 201
+                    return {'message': 'Данные работодателя обновлены'}, 201
                 except Exception as e:
                     db.session.rollback()
                     return {'message': 'Ошибка при добавлении данных работодателя', 'error': str(e)}, 500
@@ -283,7 +284,7 @@ class Profile(Resource):
                     return {'message': 'Данные соискателя обновлены'}, 201
                 except Exception as e:
                     db.session.rollback()
-                    return {'message': 'Ошибка при добавлении данных соискателя', 'error': str(e)}, 500
+                    return {'message': 'Ошибка при добавлении данных соискателя', 'error': str(e)}, 500  
     @jwt_required()
     def put(self):
         data_user = request.get_json()
@@ -292,6 +293,9 @@ class Profile(Resource):
 
         user_id = int(get_jwt_identity())
         current_user = User.query.get(user_id)
+        if not current_user:
+            return {'message': 'Пользователь не найден'}, 404
+
         user_fields = ['first_name', 'second_name', 'last_name', 'age', 'contact_phone']
         employer_fields = ['company_name', 'contact_website']
         applicant_fields = ['resume', 'education']
@@ -299,20 +303,27 @@ class Profile(Resource):
         for key, value in data_user.items():
             if key in user_fields:
                 setattr(current_user, key, value)
-            
-            elif current_user.role == 'employer' and key in employer_fields:
-                if current_user.employer:
+
+        if current_user.role == 'employer':
+            if not current_user.employer:
+                current_user.employer = Employer(user_id=current_user.id)
+            for key, value in data_user.items():
+                if key in employer_fields:
                     setattr(current_user.employer, key, value)
-            
-            elif current_user.role == 'applicant' and key in applicant_fields:
-                if current_user.applicant:
+
+        elif current_user.role == 'applicant':
+            if not current_user.applicant:
+                current_user.applicant = Applicant(user_id=current_user.id)
+            for key, value in data_user.items():
+                if key in applicant_fields:
                     setattr(current_user.applicant, key, value)
+
         try:
             db.session.commit()
             return {'message': 'Данные пользователя успешно обновлены'}, 200
         except Exception as e:
             db.session.rollback()
-            return {'message':'Ошибка при обновление данных пользователя в БД','error': str(e)}, 500
+            return {'message': 'Ошибка при обновлении данных пользователя в БД', 'error': str(e)}, 500
 api.add_resource(Profile, '/api/profile')
 
 class VacancyResource(Resource):
@@ -334,7 +345,6 @@ class VacancyResource(Resource):
                 })
             return {'vacancies': result}, 200
         else:
-            # Одна вакансия по ID
             v = Vacancy.query.get(vacancy_id)
             if not v or not v.is_active:
                 return {'message': 'Вакансия не найдена'}, 404
@@ -357,7 +367,7 @@ class VacancyResource(Resource):
     def post(self):
         try:
             user_id = int(get_jwt_identity())
-            print("User ID from token:", user_id)  # ← будет в терминале Flask
+            print("User ID from token:", user_id)  
         except Exception as e:
             print("JWT error:", e)
             return {'message': 'Invalid token'}, 401
@@ -372,6 +382,7 @@ class VacancyResource(Resource):
             employer_id = user_id,
             title = data.get('title'),
             description = data.get('description'),
+            requirements=data.get('requirements', ''),
             salary_min = data.get('salary_min'),
             salary_max = data.get('salary_max'),
             is_active = True,
@@ -409,29 +420,60 @@ class VacancyResource(Resource):
 api.add_resource(VacancyResource, '/api/vacancy', '/api/vacancy/<int:vacancy_id>')
 
 class EventResource(Resource):
-    def get(self):
-        active_events = Event.query.filter_by(is_active = True).all()
-        result = []
-        for e in active_events:
-            result.append({
-                'id': e.id,
-                'title': e.title,
-                'date': str(e.date),
-                'location': e.location
-            })
-        return {'events': result}, 200
+    def get(self, event_id=None):
+        if event_id is None:
+            active_events = Event.query.filter_by(is_active = True).all()
+            result = []
+            for e in active_events:
+                result.append({
+                    'id': e.id,
+                    'title': e.title,
+                    'date': str(e.date),
+                    'location': e.location,
+                    'description': e.description,
+                    'category': e.category
+                })
+            return {'events': result}, 200
+        else:
+            event = Event.query.filter_by(id=event_id, is_active=True).first()
+            if not event:
+                return {'message': 'Мероприятие не найдено или удалено'}, 404
+
+
+            return {
+                'id': event.id,
+                'title': event.title,
+                'date': event.date.isoformat() if event.date else None,
+                'location': event.location,
+                'description': event.description,
+                'requirements': event.requirements,
+                'category': event.category,
+            }, 200
 
     @jwt_required()
     def post(self):
         data = request.get_json()
         user_id = int(get_jwt_identity())
+
+        required_fields = ['title', 'description', 'requirements', 'location', 'date', 'capacity', 'category']
+        for field in required_fields:
+            if not data.get(field):
+                return {'message': f'Поле "{field}" обязательно'}, 400
+            
+        try:
+            event_date = datetime.fromisoformat(data['date'].replace('Z', '+00:00'))
+        except ValueError:
+            return {'message': 'Неверный формат даты'}, 400
         
         new_event = Event(
             organizer_id = user_id,
             title = data.get('title'),
             description = data.get('description'),
+            requirements=data['requirements'], 
             location = data.get('location'),
-            date = datetime.utcnow(), 
+            date = event_date,
+            capacity=data['capacity'],  
+            category=data['category'],  
             is_active = True
         )
         try:
@@ -463,7 +505,7 @@ class EventResource(Resource):
             db.session.rollback()
             return {'message': 'Ошибка удаления', 'error': str(e)}, 500
 
-api.add_resource(EventResource, '/api/event')
+api.add_resource(EventResource, '/api/event', '/api/event/<int:event_id>')
 
 class ApplyVacancy(Resource):
     @jwt_required()
@@ -537,7 +579,11 @@ class EmployerDashboard(Resource):
                 applicants.append({
                     'sign_id': sign.id,
                     'applicant_name': f"{applicant_user.first_name} {applicant_user.last_name}",
+                    'age': applicant_user.age,
+                    'contact_phone': applicant_user.contact_phone,
+                    'email': applicant_user.email,
                     'resume': applicant_user.applicant.resume if applicant_user.applicant else "Нет резюме",
+                    'education': applicant_user.applicant.education if applicant_user.applicant else None,
                     'status': sign.status,
                     'date': str(sign.date)
                 })
@@ -583,14 +629,19 @@ class ApplicantDashboard(Resource):
         
         my_applications = []
         for sign in current_user.sign_vacancy:
-            vacancy_status = "Активна" if sign.vacancy.is_active else "Вакансия удалена"
+            vacancy = sign.vacancy
+            employer_website = None
+            if sign.status == 'accepted' and vacancy.employer:
+                employer_website = vacancy.employer.contact_website
+
             my_applications.append({
-                'vacancy_title': sign.vacancy.title,
-                'company': sign.vacancy.employer.company_name,
-                'my_status': sign.status, 
-                'vacancy_state': vacancy_status
+                'vacancy_title': vacancy.title,
+                'company': vacancy.employer.company_name if vacancy.employer else "Удалено",
+                'my_status': sign.status,
+                'vacancy_state': "Активна" if vacancy.is_active else "Вакансия удалена",
+                'employer_website': employer_website,
             })
-            
+                    
         my_events = []
         for sign in current_user.sign_appointment:
             event_obj = Event.query.get(sign.event_id)
