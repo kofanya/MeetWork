@@ -1,76 +1,8 @@
-<!-- <template>
-  <div class="container">
-    <h1 class="title">Личный кабинет</h1>
-    <form >
-      <label>Имя</label>
-      <input type="text"  class="form-control" required><br>
-      <label>Фамилия</label>
-      <input type="text"  class="form-control" required><br>
-      <label>Отчество</label>
-      <input type="text"class="form-control" required><br>
-      <label>Возраст</label>
-      <input type="number" class="form-control" required><br>
-      <label>Номер телефона</label>
-      <input type="tel" class="form-control" required><br>
-      <label>Почта</label>
-      <input type="email"  class="form-control" required><br>
-      <div v-if="auth.isAuthenticated && auth.user?.role === 'employer'">
-        <label>Название компании</label>
-        <input type="text"  class="form-control" required><br>
-        <label>Сайт компании</label>
-        <input type="text"  class="form-control" required><br>
-      </div>
-      <div v-if="auth.isAuthenticated && auth.user?.role === 'applicant'">
-        <label>Резюме</label>
-        <input type="text"  class="form-control" required><br>
-        <label>Образование</label>
-        <input type="text"  class="form-control" required><br>
-      </div>
-
-      <button class="button" type="submit">Сохранить</button>
-      <button class="z-button" type="submit">Отменить</button>
-  </form>
-
-  <div class="back" v-if="auth.user?.role === 'employer'">
-      <RouterLink to="/vacancies">Смотреть отклики на вакансии</RouterLink>
-  </div>
-  <div class="back" v-if="auth.user?.role === 'organizer'">
-      <RouterLink to="/vacancies">Смотреть записи на мероприятия</RouterLink>
-  </div>
-  <div class="back"  v-if="auth.user?.role === 'applicant'">
-      <RouterLink to="/vacancies">Смотреть мои отклики на вакансии и записи на мероприятия</RouterLink>
-  </div>
-  </div>
-</template>
-
-<style scoped>
-form {
-  width: 100%;
-  max-width: 700px; 
-  padding: 0 20px;   
-}
-
-.button{
-    width: 320px;
-    margin-right: 20px;
-}
-.z-button{
-    width: 320px;
-}
-
-</style>
-<script setup>
-import { useAuthStore } from '@/stores/auth'
-
-const auth = useAuthStore()
-</script> -->
-
 <template>
   <div class="container">
     <h1 class="title">Личный кабинет</h1>
 
     <form @submit.prevent="submitProfile" v-if="!loading">
-      <!-- Основная информация -->
       <label>Имя</label>
       <input v-model="formData.first_name" type="text" class="form-control" required><br>
 
@@ -89,7 +21,6 @@ const auth = useAuthStore()
       <label>Email</label>
       <input v-model="formData.email" type="email" class="form-control" disabled><br>
 
-      <!-- Дополнительная информация: Работодатель -->
       <template v-if="formData.role === 'employer'">
         <h3>Информация о компании</h3>
         <label>Название компании</label>
@@ -99,7 +30,6 @@ const auth = useAuthStore()
         <input v-model="formData.contact_website" type="url" class="form-control"><br>
       </template>
 
-      <!-- Дополнительная информация: Соискатель -->
       <template v-else-if="formData.role === 'applicant'">
         <h3>Информация о соискателе</h3>
         <label>Резюме</label>
@@ -116,12 +46,10 @@ const auth = useAuthStore()
     <div class="back" v-if="formData.role === 'organizer'">
         <RouterLink to="/">Смотреть записи на мероприятия</RouterLink>
     </div>
-        <!-- Для работодателя -->
     <div class="back" v-if="formData.role === 'employer'">
         <RouterLink to="/employer/applications">Смотреть отклики на вакансии</RouterLink>
     </div>
 
-    <!-- Для соискателя -->
     <div class="back" v-if="formData.role === 'applicant'">
         <RouterLink to="/applicant/applications">Мои отклики и мероприятия</RouterLink>
     </div>
@@ -163,11 +91,9 @@ const formData = ref({
   email: '',
   role: '',
 
-  // Employer
   company_name: '',
   contact_website: '',
 
-  // Applicant
   resume: '',
   education: ''
 })

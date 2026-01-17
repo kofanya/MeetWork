@@ -77,7 +77,6 @@
       </div>
     </div>
 
-    <!-- Кнопка "Назад" -->
     <div class="back" style="margin-top: 30px;">
       <RouterLink to="/vacancies">← Вернуться к списку вакансий</RouterLink>
     </div>
@@ -158,7 +157,6 @@ const deleteComment = async (commentId) => {
   }
 }
 
-// Удаление вакансии
 const deleteVacancy = async () => {
   if (!confirm('Вы уверены, что хотите удалить эту вакансию?')) return
 
