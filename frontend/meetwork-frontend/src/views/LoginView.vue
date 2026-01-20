@@ -48,7 +48,7 @@ const login = async () => {
     await auth.login(email.value, password.value)
     router.push('/')
   } catch (error) {
-    alert(error.message)
+    alert("Зарегистрируйтесь, чтобы продолжить")
   }
 }
 </script>

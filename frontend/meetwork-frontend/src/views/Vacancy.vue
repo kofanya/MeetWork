@@ -5,7 +5,7 @@
     <span>Категория: {{ CATEGORIES[vacancy.category] || vacancy.category }}</span><br />
     <span>Дата публикации: {{ new Date(vacancy.date).toLocaleDateString() }}</span><br />
     <span>Работодатель: {{ vacancy.company_name }}</span><br />
-    <span>адрес предприятия: {{ vacancy.location }}</span><br />
+    <span>Aдрес предприятия: {{ vacancy.location }}</span><br />
     </div>
     <span>Зарплата: от {{ vacancy.salary_min }} до {{ vacancy.salary_max }}</span>
     <div class="vacancy-text" style="line-height: 1.7; margin-top: 20px;">
@@ -69,7 +69,7 @@
           </div>
           <div style="margin-top: 8px;">{{ comment.text }}</div>
               <div style="margin-top: 8px;">
-            <button @click="deleteComment(comment.id)" class="delete-button" style="font-size: 0.9em; padding: 4px 8px;">
+            <button @click="deleteComment(comment.id)" class="delete-comment" style="font-size: 0.9em; padding: 4px 8px;">
               Удалить отзыв
             </button>
           </div>
@@ -254,9 +254,28 @@ const applyToVacancy = async () => {
 
 .delete-button {
   padding: 12px 28px;
-  background: #f1a18b;
+  background: #f2cabf;
   color: #2d3748;
   font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.delete-comment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #f3bba8;}
+
+.delete-comment {
+  padding: 8px 24px;
+  background: #f2cabf;
+  color: #2d3748;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   border-radius: 12px;
@@ -270,5 +289,4 @@ const applyToVacancy = async () => {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   background: #f3bba8;}
-
 </style>

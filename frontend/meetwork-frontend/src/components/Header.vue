@@ -22,6 +22,8 @@
             <RouterLink to="/createevents">Создание мероприятия</RouterLink>
           </li>
 
+           <NotificationBell  />
+
           <li v-if="auth.isAuthenticated">
             Привет, {{ auth.user?.first_name }}!
           </li>
@@ -72,7 +74,7 @@
 .header-nav ul {
   list-style: none;
   display: flex;
-  gap: 32px;
+  gap: 26px;
 }
 
 .header-nav a {
@@ -112,6 +114,7 @@
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import NotificationBell from '@/components/NotificationBell.vue'
 
 const auth = useAuthStore()
 const router = useRouter()

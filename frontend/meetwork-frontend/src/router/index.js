@@ -14,6 +14,8 @@ import Vacancy from '../views/Vacancy.vue'
 import Event from '../views/Event.vue'
 import Applicant from '../views/Applicant.vue'
 import Employer from '../views/Employer.vue'
+import Organizer from '@/views/Organizer.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -40,6 +42,7 @@ const router = createRouter({
     { path: '/event/:id', component: Event },
     { path: '/employer/applications', component: Employer },
     { path: '/applicant/applications', component: Applicant },
+    {path: '/organizer/applications', component: Organizer}
 
   ],
 })

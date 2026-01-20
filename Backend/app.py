@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, redirect, url_for, jsonify,make_response
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_restful import Api, Resource, reqparse ,marshal_with,marshal,fields
 from werkzeug.security import check_password_hash,generate_password_hash
 from flask_jwt_extended import (
@@ -61,7 +61,9 @@ class User (db.Model):
     comment_event = db.relationship('Comment_event',backref = 'user')
     recipient = db.relationship('Notification',foreign_keys = 'Notification.recipient_user_id',backref = 'recipient_user')
     sender = db.relationship('Notification',foreign_keys = 'Notification.sender_user_id',backref = 'sender_user')
-    sign_appointment = db.relationship('Sign_appointment',backref = 'user')
+    # sign_appointment = db.relationship('Sign_appointment',backref = 'user')
+    # В классе User
+    sign_appointment = db.relationship('Sign_appointment', foreign_keys='Sign_appointment.applicant_id', backref='applicant_user')
     sign_vacancy = db.relationship('Sign_vacancy', backref = 'user')
     
     
@@ -128,10 +130,11 @@ class Notification(db.Model):
     title = db.Column(db.String(100))
     message = db.Column(db.Text)
     date = db.Column(db.DateTime, default = datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
 
 class Sign_appointment(db.Model):
     id = db.Column(db.Integer,primary_key = True)
-    organizer_id = db.Column(db.Integer,db.ForeignKey('user.id'))
+    applicant_id = db.Column(db.Integer,db.ForeignKey('user.id'))                       
     event_id = db.Column(db.Integer,db.ForeignKey('event.id'))
     date = db.Column(db.DateTime, default = datetime.utcnow)
     status = db.Column(db.String(20), default = 'pending')
@@ -377,12 +380,24 @@ class VacancyResource(Resource):
         
         if current_user.role != 'employer':
             return {'message': 'Только работодатель может создавать вакансии'}, 403
+        
+        if not current_user.employer:
+            return {
+                'message': 'Заполните информацию о компании в личном кабинете перед созданием вакансии'
+            }, 400
+
+        employer = current_user.employer
+        if not employer.company_name or not employer.company_name.strip():
+            return {
+                'message': 'Укажите название компании в личном кабинете перед созданием вакансии'
+            }, 400
 
         new_vacancy = Vacancy(
             employer_id = user_id,
             title = data.get('title'),
             description = data.get('description'),
             requirements=data.get('requirements', ''),
+            location=data.get('location', ''),
             salary_min = data.get('salary_min'),
             salary_max = data.get('salary_max'),
             is_active = True,
@@ -422,23 +437,35 @@ api.add_resource(VacancyResource, '/api/vacancy', '/api/vacancy/<int:vacancy_id>
 class EventResource(Resource):
     def get(self, event_id=None):
         if event_id is None:
-            active_events = Event.query.filter_by(is_active = True).all()
+            now = datetime.utcnow()
+            active_events = Event.query.filter(
+                Event.is_active == True,
+                Event.date >= now
+            ).all()
+            # active_events = Event.query.filter_by(is_active = True).all()
             result = []
             for e in active_events:
+                organizer = User.query.get(e.organizer_id)
                 result.append({
                     'id': e.id,
                     'title': e.title,
                     'date': str(e.date),
                     'location': e.location,
                     'description': e.description,
-                    'category': e.category
+                    'category': e.category,
+                    'organizer_name': f"{organizer.first_name} {organizer.last_name}" if organizer else "Неизвестен"
                 })
             return {'events': result}, 200
         else:
             event = Event.query.filter_by(id=event_id, is_active=True).first()
             if not event:
                 return {'message': 'Мероприятие не найдено или удалено'}, 404
-
+        
+            organizer = User.query.get(event.organizer_id)
+            organizer_info = {
+                'first_name': organizer.first_name if organizer else None,
+                'last_name': organizer.last_name if organizer else None
+            }
 
             return {
                 'id': event.id,
@@ -448,6 +475,7 @@ class EventResource(Resource):
                 'description': event.description,
                 'requirements': event.requirements,
                 'category': event.category,
+                'organizer': organizer_info
             }, 200
 
     @jwt_required()
@@ -459,11 +487,16 @@ class EventResource(Resource):
         for field in required_fields:
             if not data.get(field):
                 return {'message': f'Поле "{field}" обязательно'}, 400
-            
         try:
-            event_date = datetime.fromisoformat(data['date'].replace('Z', '+00:00'))
-        except ValueError:
-            return {'message': 'Неверный формат даты'}, 400
+            date_str = data['date']
+            if date_str.endswith('Z'):
+                event_date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                event_date = event_date.replace(tzinfo=timezone.utc).astimezone().replace(tzinfo=None)
+            else:
+                event_date = datetime.fromisoformat(date_str)
+        except ValueError as e:
+            print("Ошибка парсинга даты:", e)
+            return {'message': 'Неверный формат даты'}, 400  
         
         new_event = Event(
             organizer_id = user_id,
@@ -525,6 +558,17 @@ class ApplyVacancy(Resource):
         )
         try:
             db.session.add(new_sign)
+            vacancy = Vacancy.query.get(vacancy_id)
+            applicant = User.query.get(user_id)
+
+            # Создаём уведомление для работодателя
+            notif = Notification(
+                recipient_user_id=vacancy.employer_id,
+                sender_user_id=user_id,
+                title="Новый отклик на вакансию",
+                message=f"Пользователь {applicant.first_name} {applicant.last_name} откликнулся на вакансию «{vacancy.title}»."
+            )
+            db.session.add(notif)
             db.session.commit()
             return {'message': 'Отклик отправлен работодателю'}, 201
         except Exception as e:
@@ -540,17 +584,28 @@ class JoinEvent(Resource):
         event_id = data.get('event_id')
         user_id = int(get_jwt_identity())
         
-        exists = Sign_appointment.query.filter_by(organizer_id = user_id, event_id = event_id).first()
+        exists = Sign_appointment.query.filter_by(applicant_id = user_id, event_id = event_id).first()
         if exists:
             return {'message': 'Вы уже записаны на это мероприятие'}, 409
             
         new_sign = Sign_appointment(
-            organizer_id = user_id, 
+            applicant_id=user_id,
             event_id = event_id,
             status = 'pending'
         )
         try:
             db.session.add(new_sign)
+            event = Event.query.get(event_id)
+            applicant = User.query.get(user_id)
+
+            # Уведомление для организатора
+            notif = Notification(
+                recipient_user_id=event.organizer_id,
+                sender_user_id=user_id,
+                title="Новая запись на мероприятие",
+                message=f"Пользователь {applicant.first_name} {applicant.last_name} записался на мероприятие «{event.title}»."
+            )
+            db.session.add(notif)
             db.session.commit()
             return {'message': 'Вы записались на мероприятие'}, 201
         except Exception as e:
@@ -612,6 +667,26 @@ class EmployerDashboard(Resource):
             return {'message': 'Это не ваш отклик'}, 403
             
         sign.status = new_status
+        # Получаем соискателя
+        applicant = User.query.get(sign.applicant_id)
+        vacancy = sign.vacancy
+
+        # Определяем текст статуса
+        status_labels = {
+            'pending': 'в ожидании',
+            'confirmed': 'подтверждён',
+            'rejected': 'отклонён'
+        }
+        status_text = status_labels.get(new_status, new_status)
+
+        # Уведомление для соискателя
+        notif = Notification(
+            recipient_user_id=sign.applicant_id,
+            sender_user_id=user_id,
+            title="Изменён статус отклика",
+            message=f"Ваш отклик на вакансию «{vacancy.title}» теперь {status_text}."
+        )
+        db.session.add(notif)
         try:
             db.session.commit()
             return {'message': f'Статус изменен на {new_status}'}, 200
@@ -636,7 +711,7 @@ class ApplicantDashboard(Resource):
 
             my_applications.append({
                 'vacancy_title': vacancy.title,
-                'company': vacancy.employer.company_name if vacancy.employer else "Удалено",
+                'company': vacancy.employer.company_name if vacancy.employer else "Не указана",
                 'my_status': sign.status,
                 'vacancy_state': "Активна" if vacancy.is_active else "Вакансия удалена",
                 'employer_website': employer_website,
@@ -647,14 +722,97 @@ class ApplicantDashboard(Resource):
             event_obj = Event.query.get(sign.event_id)
             event_state = "Активно" if event_obj.is_active else "Отменено"
             my_events.append({
+                'sign_id': sign.id,
                 'event_title': event_obj.title,
-                'my_status': sign.status,
-                'event_state': event_state
+                'event_date': event_obj.date.isoformat() if event_obj.date else None,
+                'location': event_obj.location,
+                'my_status': sign.status,  # pending / confirmed / rejected
+                'event_state': "Активно" if event_obj.is_active else "Отменено"
             })
             
         return {'applications': my_applications, 'events': my_events}, 200
 
 api.add_resource(ApplicantDashboard, '/api/applicant/dashboard')
+
+class OrganizerDashboard(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = int(get_jwt_identity())
+        current_user = User.query.get(user_id)
+
+        if current_user.role != 'organizer':
+            return {'message': 'Доступ запрещён'}, 403
+
+        events = Event.query.filter_by(organizer_id=user_id).all()
+
+        result = []
+        for event in events:
+            applicants = []
+            for sign in event.sign_appointment:
+                applicant = User.query.get(sign.applicant_id)
+                applicants.append({
+                    'sign_id': sign.id,
+                    'applicant_name': f"{applicant.first_name} {applicant.last_name}" if applicant else "Удалён",
+                    'contact_phone': applicant.contact_phone if applicant else None,
+                    'email': applicant.email if applicant else None,
+                    'status': sign.status,
+                    'date_applied': sign.date.isoformat() if sign.date else None
+                })
+
+            result.append({
+                'event_id': event.id,
+                'event_title': event.title,
+                'applicants': applicants
+            })
+
+        return {'my_events': result}, 200
+
+    @jwt_required()
+    def put(self):
+        data = request.get_json()
+        sign_id = data.get('sign_id')
+        new_status = data.get('status')
+
+        if new_status not in ['pending', 'confirmed', 'rejected']:
+            return {'message': 'Недопустимый статус'}, 400
+
+        user_id = int(get_jwt_identity())
+
+        sign = Sign_appointment.query.get(sign_id)
+        if not sign:
+            return {'message': 'Заявка не найдена'}, 404
+        
+        event = Event.query.get(sign.event_id)
+        if not event or event.organizer_id != user_id:
+            return {'message': 'Это не ваше мероприятие'}, 403
+
+        sign.status = new_status
+                # Получаем участника
+        applicant = User.query.get(sign.applicant_id)
+        event = sign.event
+
+        status_labels = {
+            'pending': 'в ожидании',
+            'confirmed': 'подтверждена',
+            'rejected': 'отклонена'
+        }
+        status_text = status_labels.get(new_status, new_status)
+
+        notif = Notification(
+            recipient_user_id=sign.applicant_id,
+            sender_user_id=user_id,
+            title="Изменён статус заявки на мероприятие",
+            message=f"Ваша заявка на мероприятие «{event.title}» теперь {status_text}."
+        )
+        db.session.add(notif)
+        try:
+            db.session.commit()
+            return {'message': f'Статус изменён на "{new_status}"'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': 'Ошибка обновления статуса', 'error': str(e)}, 500
+
+api.add_resource(OrganizerDashboard, '/api/organizer/dashboard')
 
 class CommentResource(Resource):
     @jwt_required()
@@ -743,6 +901,43 @@ class CommentResource(Resource):
             return {'comments': result}, 200
 
 api.add_resource(CommentResource, '/api/comment')
+
+class NotificationsResource(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = int(get_jwt_identity())
+        notifications = Notification.query.filter_by(recipient_user_id=user_id)\
+                                         .order_by(Notification.date.desc())\
+                                         .limit(20).all()
+        result = []
+        for n in notifications:
+            sender = User.query.get(n.sender_user_id) if n.sender_user_id else None
+            result.append({
+                'id': n.id,
+                'title': n.title,
+                'message': n.message,
+                'date': n.date.isoformat(),
+                'is_read': n.is_read,
+                'sender_name': f"{sender.first_name} {sender.last_name}" if sender else "Система"
+            })
+        return {'notifications': result}, 200
+
+    @jwt_required()
+    def post(self):
+        user_id = int(get_jwt_identity())
+        unread = Notification.query.filter_by(
+            recipient_user_id=user_id,
+            is_read=False
+        ).all()
+        for n in unread:
+            n.is_read = True
+        try:
+            db.session.commit()
+            return {'message': f'Отмечено {len(unread)} уведомлений как прочитанных'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': 'Ошибка при обновлении уведомлений', 'error': str(e)}, 500
+api.add_resource(NotificationsResource, '/api/notifications')
 
 with app.app_context():
     db.create_all()

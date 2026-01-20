@@ -83,21 +83,20 @@ const handleSubmit = async () => {
       })
     })
 
-    const data = await response.json()
+    const responseData = await response.json()
 
     if (response.ok) {
       alert('Вакансия создана!')
       router.push('/vacancies')
-    } else if (response.status === 401) {
-      // Сессия истекла или токен недействителен
-      authStore.logoutLocal() 
-      alert('Сессия завершена. Пожалуйста, войдите снова.')
-      router.push('/login')
     } else {
-      const data = await response.json()
-      alert(data.message || 'Ошибка создания')
-    }} 
-    catch (error) {
+      if (response.status === 400) {
+        alert('Пожалуйста, заполните поля компании в личном кабинете')
+        router.push('/profile')
+      } else {
+        alert(responseData.message || 'Ошибка создания вакансии')
+      }
+    }}
+  catch (error) {
     console.error('Ошибка сети:', error)
     alert('Не удалось подключиться к серверу')
   }

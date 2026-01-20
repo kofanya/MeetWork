@@ -44,7 +44,7 @@
     </form>
     
     <div class="back" v-if="formData.role === 'organizer'">
-        <RouterLink to="/">Смотреть записи на мероприятия</RouterLink>
+        <RouterLink to="/organizer/applications">Смотреть записи на мероприятия</RouterLink>
     </div>
     <div class="back" v-if="formData.role === 'employer'">
         <RouterLink to="/employer/applications">Смотреть отклики на вакансии</RouterLink>
