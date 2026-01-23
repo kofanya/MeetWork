@@ -39,7 +39,7 @@
     </div>
 
     <div  class="container-2">
-      <h3>Вы работник этой компании? Оставьте отзыв!</h3>
+      <h3>Оставить комментарий</h3>
       <form @submit.prevent="submitComment" style="margin-top: 10px;">
         <textarea
          v-model="commentText"
@@ -53,9 +53,9 @@
     </div>
 
     <div style="margin-top: 40px;">
-      <h3>Отзывы на работодателя ({{ comments.length }})</h3>
+      <h3>Комментарии ({{ comments.length }})</h3>
       <div v-if="comments.length === 0">
-        <p>Пока нет отзывов.</p>
+        <p>Пока нет комментариев.</p>
       </div>
       <div v-else>
         <div
