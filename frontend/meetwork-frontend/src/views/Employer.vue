@@ -122,7 +122,7 @@ onMounted(() => {
   height: auto;
 }
 .form-control{
-    width: 400px;
+    max-width: 400px;
 }
 </style>
 

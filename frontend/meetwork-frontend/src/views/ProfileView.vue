@@ -4,74 +4,134 @@
 
     <form @submit.prevent="submitProfile" v-if="!loading">
       <label>Имя</label>
-      <input v-model="formData.first_name" type="text" class="form-control" required><br>
+      <input v-model="formData.first_name" type="text" class="form-control" required>
 
       <label>Отчество</label>
-      <input v-model="formData.second_name" type="text" class="form-control"><br>
+      <input v-model="formData.second_name" type="text" class="form-control">
 
       <label>Фамилия</label>
-      <input v-model="formData.last_name" type="text" class="form-control" required><br>
+      <input v-model="formData.last_name" type="text" class="form-control" required>
 
       <label>Возраст</label>
-      <input v-model.number="formData.age" type="number" min="14" max="100" class="form-control" required><br>
+      <input v-model.number="formData.age" type="number" min="14" max="100" class="form-control" required>
 
       <label>Телефон</label>
-      <input v-model="formData.contact_phone" type="tel" class="form-control" required><br>
+      <input v-model="formData.contact_phone" type="tel" class="form-control" required>
 
       <label>Email</label>
-      <input v-model="formData.email" type="email" class="form-control" disabled><br>
+      <input v-model="formData.email" type="email" class="form-control" disabled>
 
       <template v-if="formData.role === 'employer'">
         <h3>Информация о компании</h3>
         <label>Название компании</label>
-        <input v-model="formData.company_name" type="text" class="form-control" required><br>
+        <input v-model="formData.company_name" type="text" class="form-control" required>
 
         <label>Сайт компании</label>
-        <input v-model="formData.contact_website" type="url" class="form-control"><br>
+        <input v-model="formData.contact_website" type="url" class="form-control">
       </template>
 
       <template v-else-if="formData.role === 'applicant'">
         <h3>Информация о соискателе</h3>
         <label>Резюме</label>
-        <textarea v-model="formData.resume" class="form-control textarea-scrollable" rows="5"></textarea><br>
+        <textarea v-model="formData.resume" class="form-control textarea-scrollable" rows="5"></textarea>
 
         <label>Образование</label>
-        <textarea v-model="formData.education" class="form-control textarea-scrollable" rows="4"></textarea><br>
+        <textarea v-model="formData.education" class="form-control textarea-scrollable" rows="4"></textarea>
       </template>
 
-      <button type="submit" class="button">Сохранить изменения</button>
-      <button type="button" class="z-button" @click="$router.back()">Назад</button>
+      <div class="button-group">
+        <button type="submit" class="button">Сохранить изменения</button>
+        <button type="button" class="z-button" @click="$router.back()">Назад</button>
+      </div>
     </form>
     
-    <div class="back" v-if="formData.role === 'organizer'">
-        <RouterLink to="/organizer/applications">Смотреть записи на мероприятия</RouterLink>
+    <div class="navigation-links">
+        <div class="back" v-if="formData.role === 'organizer'">
+            <RouterLink to="/organizer/applications">Смотреть записи на мероприятия</RouterLink>
+        </div>
+        <div class="back" v-if="formData.role === 'employer'">
+            <RouterLink to="/employer/applications">Смотреть отклики на вакансии</RouterLink>
+        </div>
+        <div class="back" v-if="formData.role === 'applicant'">
+            <RouterLink to="/applicant/applications">Мои отклики и мероприятия</RouterLink>
+        </div>
     </div>
-    <div class="back" v-if="formData.role === 'employer'">
-        <RouterLink to="/employer/applications">Смотреть отклики на вакансии</RouterLink>
-    </div>
-
-    <div class="back" v-if="formData.role === 'applicant'">
-        <RouterLink to="/applicant/applications">Мои отклики и мероприятия</RouterLink>
-    </div>
-
   </div>
 </template>
 
 <style scoped>
 form {
   width: 100%;
-  max-width: 700px; 
-  padding: 0 20px;   
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; 
+  margin: 0 auto;
 }
 
-.button{
-    width: 320px;
-    margin-right: 20px;
-}
-.z-button{
-    width: 320px;
+.button-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 16px;            
+  margin-top: 30px;
+  align-items: center;  
 }
 
+.button, .z-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;        
+  width: 100%;           
+  max-width: 400px;      
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+  margin: 0;
+}
+
+.button {
+  background: #BFC5A9;
+  color: #2d3748;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #e5ebce;
+}
+
+.z-button {
+  background: #f8edd0;
+  color: #2d3748;
+}
+
+.z-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #fbf5e3;
+}
+
+.navigation-links {
+  margin-top: 20px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .button-group {
+    flex-direction: column;
+    align-items: center;   
+  }
+
+  .button, .z-button {
+    max-width: 100%;
+  }
+}
 </style>
 <script setup>
 import { ref, onMounted } from 'vue'

@@ -223,13 +223,16 @@ const applyToVacancy = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ vacancy_id: route.params.id })
     })
+    const data = await response.json();
 
     if (response.ok) {
-      const data = await response.json()
       alert(data.message)
     } else if (response.status === 409) {
       alert('Вы уже откликнулись на эту вакансию')
-    } else if (response.status === 401) {
+    } else if (response.status === 400) {
+      if (confirm(`${data.message}\n\nПерейти в личный кабинет для заполнения?`)) {
+        router.push('/profile')}
+    }else if (response.status === 401) {
       authStore.logoutLocal()
       router.push('/login')
     } else {
@@ -250,6 +253,7 @@ const applyToVacancy = async () => {
     margin-right: auto;
     margin-bottom: 100px;
     margin-top: 50px;
+    padding: 0 20px;
 }
 
 .delete-button {

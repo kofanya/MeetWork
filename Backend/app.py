@@ -17,8 +17,9 @@ from flask_jwt_extended import (
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
 app.config['JWT_SECRET_KEY'] = '834g93gb9ug34u9njscd234kmpiq3jipwuo3v55vu94fpi53foqfm3ipw7vu959uw'
-app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # ← только куки!
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # ← отключить CSRF
+app.config['JWT_TOKEN_LOCATION'] = ['cookies'] 
+app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token_cookie'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  
 api = Api(app)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
@@ -61,8 +62,6 @@ class User (db.Model):
     comment_event = db.relationship('Comment_event',backref = 'user')
     recipient = db.relationship('Notification',foreign_keys = 'Notification.recipient_user_id',backref = 'recipient_user')
     sender = db.relationship('Notification',foreign_keys = 'Notification.sender_user_id',backref = 'sender_user')
-    # sign_appointment = db.relationship('Sign_appointment',backref = 'user')
-    # В классе User
     sign_appointment = db.relationship('Sign_appointment', foreign_keys='Sign_appointment.applicant_id', backref='applicant_user')
     sign_vacancy = db.relationship('Sign_vacancy', backref = 'user')
     
@@ -546,6 +545,12 @@ class ApplyVacancy(Resource):
         data = request.get_json()
         vacancy_id = data.get('vacancy_id')
         user_id = int(get_jwt_identity())
+
+        applicant_profile = Applicant.query.get(user_id)
+        if not applicant_profile or not applicant_profile.resume or not applicant_profile.education:
+            return {
+                'message': 'Чтобы откликнуться, необходимо заполнить «Резюме» и «Образование» в личном кабинете.'
+            }, 400
         
         exists = Sign_vacancy.query.filter_by(applicant_id = user_id, vacancy_id = vacancy_id).first()
         if exists:
@@ -674,7 +679,7 @@ class EmployerDashboard(Resource):
         # Определяем текст статуса
         status_labels = {
             'pending': 'в ожидании',
-            'confirmed': 'подтверждён',
+            'accepted': 'подтверждён',
             'rejected': 'отклонён'
         }
         status_text = status_labels.get(new_status, new_status)
@@ -787,7 +792,6 @@ class OrganizerDashboard(Resource):
             return {'message': 'Это не ваше мероприятие'}, 403
 
         sign.status = new_status
-                # Получаем участника
         applicant = User.query.get(sign.applicant_id)
         event = sign.event
 
@@ -916,7 +920,7 @@ class NotificationsResource(Resource):
                 'id': n.id,
                 'title': n.title,
                 'message': n.message,
-                'date': n.date.isoformat(),
+                'date': n.date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'is_read': n.is_read,
                 'sender_name': f"{sender.first_name} {sender.last_name}" if sender else "Система"
             })

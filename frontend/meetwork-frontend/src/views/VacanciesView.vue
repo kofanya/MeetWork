@@ -65,7 +65,6 @@ const filteredVacancies = computed(() => {
 .container-2 {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
 }
 
 .title {
@@ -90,6 +89,7 @@ const filteredVacancies = computed(() => {
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
   justify-items: center;
+  margin-bottom: 40px;
 }
 
 .blog-card {

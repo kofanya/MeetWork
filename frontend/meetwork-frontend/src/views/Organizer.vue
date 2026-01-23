@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container-2">
     <h1>Панель организатора</h1>
 
     <div v-if="loading" class="loading">Загрузка...</div>
@@ -31,21 +31,21 @@
               <th>Действие</th>
             </tr>
           </thead>
-          <tbody>
+                    <tbody>
             <tr v-for="applicant in event.applicants" :key="applicant.sign_id">
-              <td>{{ applicant.applicant_name }}</td>
-              <td>{{ applicant.contact_phone || '—' }}</td>
-              <td>{{ applicant.email || '—' }}</td>
-              <td>
+              <td data-label="Имя">{{ applicant.applicant_name }}</td>
+              <td data-label="Телефон">{{ applicant.contact_phone || '—' }}</td>
+              <td data-label="Email">{{ applicant.email || '—' }}</td>
+              <td data-label="Статус">
                 <span :class="`status-badge status-${applicant.status}`">
                   {{ statusLabels[applicant.status] }}
                 </span>
               </td>
-              <td>
+              <td data-label="Действие">
                 <select
                   v-model="applicant.newStatus"
                   @change="updateStatus(applicant)"
-                  class="status-select"
+                  class="form-control"
                 >
                   <option value="pending">В ожидании</option>
                   <option value="confirmed">Подтверждён</option>
@@ -226,10 +226,57 @@ onMounted(() => {
   color: #721c24;
 }
 
-.status-select {
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.9em;
+@media (max-width: 768px) {
+  .container-2 {
+    padding: 0 10px;
+  }
+
+  .applicants-table thead {
+    display: none;
+  }
+
+  .applicants-table, 
+  .applicants-table tbody, 
+  .applicants-table tr, 
+  .applicants-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .applicants-table tr {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fafafa;
+  }
+
+  .applicants-table td {
+    text-align: right;
+    padding: 10px 5px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .applicants-table td:last-child {
+    border-bottom: none;
+  }
+
+  .applicants-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    color: #777;
+    margin-right: 15px;
+  }
+
+  .status-select {
+    width: auto;
+    max-width: 150px;
+  }
 }
 </style>
