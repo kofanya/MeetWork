@@ -5,5 +5,6 @@ export const EVENTCATEGORIES = {
   sport: 'Спорт',
   charity: 'Благотворительность',
   fun: 'Развлечения',
-  other: '',
+  professional: 'Профессиональное развитие',
+  it: 'IT',
 }

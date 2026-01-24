@@ -43,7 +43,7 @@
       <form @submit.prevent="submitComment" style="margin-top: 10px;">
         <textarea
          v-model="commentText"
-          placeholder="Ваш отзыв..."
+          placeholder="Ваш комментарий..."
           class="form-control"
           rows="4"
           required
