@@ -166,7 +166,6 @@ class Register(Resource):
             if User.query.filter_by(email = data_user['email']).first():
                 return {'message':'Вы уже зарегистрированы на сайте'},400
             else:
-
                 psw_hash = generate_password_hash(data_user['password'])
                 new_user = User(first_name = data_user['first_name'],
                                 second_name = data_user['second_name'],
@@ -390,6 +389,18 @@ class VacancyResource(Resource):
             return {
                 'message': 'Укажите название компании в личном кабинете перед созданием вакансии'
             }, 400
+        try:
+            salary_min = int(data.get('salary_min', 0))
+            salary_max = int(data.get('salary_max', 0))
+
+            if salary_min < 0 or salary_max < 0:
+                return {'message': 'Зарплата не может быть отрицательной'}, 400
+            
+            if salary_min > salary_max:
+                return {'message': 'Минимальная зарплата не может быть больше максимальной'}, 400
+                
+        except (ValueError, TypeError):
+             return {'message': 'Зарплата должна быть числом'}, 400
 
         new_vacancy = Vacancy(
             employer_id = user_id,

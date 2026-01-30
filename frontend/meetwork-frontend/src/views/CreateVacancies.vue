@@ -18,9 +18,9 @@
         <label>Зарплата</label>
         <div class="salary-inputs">
           <span>От:</span>
-          <input v-model="form.salary_min" type="number" class="form-control" required>
+          <input v-model="form.salary_min" min="0" type="number" class="form-control" required>
           <span>До:</span>
-          <input v-model="form.salary_max" type="number" class="form-control" required>
+          <input v-model="form.salary_max" min="0" type="number" class="form-control" required>
         </div>
       </div>
 
@@ -138,6 +138,10 @@ watch(form, (newVal) => {
 }, { deep: true })
 
 const handleSubmit = async () => {
+  if (form.value.salary_min < 0 || form.value.salary_max < 0) {
+    alert('Зарплата не может быть отрицательной')
+    return
+  }
   if (form.value.salary_min > form.value.salary_max) {
     alert('Минимальная зарплата не может быть больше максимальной')
     return
